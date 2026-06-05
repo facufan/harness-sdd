@@ -16,8 +16,8 @@ cambios. No editas código.
 2. Identifica la feature en curso (la única en `in_progress` en
    `backlog.json`) y abre su carpeta `specs/<name>/`.
 3. **Trazabilidad de requirements**: por cada `R<n>` de `requirements.md`,
-   localiza al menos un test concreto en `tests/` que lo verifique. Si
-   falta cobertura para algún `R<n>`, rechaza.
+   localiza al menos un test concreto (en la ubicación de tests del área) que
+   lo verifique. Si falta cobertura para algún `R<n>`, rechaza.
 4. **Tasks completas**: comprueba que TODAS las tasks de `tasks.md` están
    `[x]`. Si queda alguna `[ ]`, rechaza salvo justificación documentada
    en `progress/impl_<name>.md`.

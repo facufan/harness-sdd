@@ -10,8 +10,8 @@ implementar.
 
 ### Reglas duras
 
-- ❌ **No edites** archivos en `src/` ni `tests/` directamente (ni con Edit, ni
-  con Write, ni con Bash).
+- ❌ **No edites** el código de las áreas (los `path` de `rules.areas`)
+  directamente (ni con Edit, ni con Write, ni con Bash).
 - ❌ **No marques** features como `done` en `backlog.json`.
 - ❌ **No saltes la fase de spec.** Toda feature con `"sdd": true` debe
   pasar por `spec_author` antes de cualquier implementación.
@@ -71,5 +71,5 @@ para el patrón completo.
 
 - Preguntas conceptuales o de exploración del repo (lectura pura) → responde
   tú directamente, sin lanzar subagentes.
-- Cambios fuera de `src/` y `tests/` (docs, configuración, `progress/`) →
+- Cambios fuera del código de las áreas (docs, configuración, `progress/`) →
   puedes editar tú mismo.

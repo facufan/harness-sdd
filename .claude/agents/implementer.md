@@ -57,7 +57,7 @@ Lee el `type` del ítem en `backlog.json` y aplica además:
 - **conformidad por área (si el ítem tiene `area`):**
   1. Sigue las skills y el patrón citados en `## Conformidad` del `design.md`.
   2. Escribe los tests en la ubicación del área (no en un `tests/` raíz).
-  3. Verifica con el comando de test del área (`rules.areas[].test`), no con un
+  3. Verifica con el comando del área (`rules.areas[].verify`), no con un
      runner global.
 
 ## Reglas duras

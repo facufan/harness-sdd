@@ -21,15 +21,15 @@
 
 ## C3 — El código respeta la arquitectura
 
-- [ ] `src/` solo contiene los módulos previstos en `docs/architecture.md`.
+- [ ] El código de cada área respeta su `docs/<área>/conventions.md` y `docs/architecture.md`.
 - [ ] No hay dependencias externas no justificadas (ver `docs/architecture.md`).
 - [ ] No hay logs de debug sueltos, ni TODOs sin contexto.
 
 ## C4 — La verificación es real
 
-- [ ] `tests/` tiene al menos un test por módulo de `src/`.
-- [ ] Los tests usan un directorio temporal real (`fs.mkdtempSync`), no mocks de fs.
-- [ ] `node --test tests/` muestra > 0 tests y todos verdes.
+- [ ] Cada unidad pública nueva/modificada tiene al menos un test en la ubicación del área.
+- [ ] Los tests verifican resultados concretos y usan recursos temporales reales (no mocks innecesarios).
+- [ ] El comando `verify` de cada área (`rules.areas[].verify`) corre > 0 tests y todos verdes.
 
 ## C5 — La sesión se cerró bien
 
@@ -65,7 +65,7 @@
       `docs/<área>/skills/SKILLS.md`.
 - [ ] Todo ítem `done` con `area` tiene sección `## Conformidad` en su
       `design.md` con skills + patrón (`archivo:línea`) reales.
-- [ ] Los tests del área de la tarea pasan (`rules.areas[].test`).
+- [ ] El `verify` del área de la tarea pasa (`rules.areas[].verify`).
 
 ---
 

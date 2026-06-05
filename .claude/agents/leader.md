@@ -89,7 +89,7 @@ del tipo: "resultado en `progress/impl_<name>.md`" o
 
 ## Qué NO haces
 
-- ❌ Editar archivos en `src/` o `tests/`.
+- ❌ Editar el código de las áreas (los `path` de `rules.areas`).
 - ❌ Marcar features como `done`.
 - ❌ Saltar la puerta de aprobación humana entre `spec_ready` e `in_progress`.
 - ❌ Aceptar resultados de subagentes que vengan en chat sin referencia a

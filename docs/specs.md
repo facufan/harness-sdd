@@ -65,7 +65,7 @@ Ejemplo:
 
 ```markdown
 ## R1
-CUANDO el usuario ejecuta `node src/cli.ts recent`, el sistema DEBE
+CUANDO el usuario ejecuta el comando `recent`, el sistema DEBE
 imprimir hasta 5 notas ordenadas por `created_at` descendente.
 
 ## R2
@@ -94,10 +94,10 @@ menos un `R<n>` que cubre.
 Ejemplo:
 
 ```markdown
-- [ ] T1 — Añadir el comando `recent` en `src/cli.ts`. Cubre: R1, R3.
+- [ ] T1 — Añadir el comando `recent` en el módulo CLI del área. Cubre: R1, R3.
 - [ ] T2 — Parsear el flag `--limit` con validación. Cubre: R1, R2.
-- [ ] T3 — Añadir test "recent usa límite 5 por defecto" en `tests/cli.test.ts`. Cubre: R1.
-- [ ] T4 — Añadir test "recent rechaza límite <= 0" en `tests/cli.test.ts`. Cubre: R2.
+- [ ] T3 — Añadir test "recent usa límite 5 por defecto" en los tests del área. Cubre: R1.
+- [ ] T4 — Añadir test "recent rechaza límite <= 0" en los tests del área. Cubre: R2.
 ```
 
 El `implementer` marca `[x]` cada task al completarla. El `reviewer`
@@ -105,7 +105,7 @@ rechaza si queda alguna `[ ]` sin justificación documentada.
 
 ## Trazabilidad (regla dura)
 
-- Cada test en `tests/` debe poder mapearse a un `R<n>` de su spec.
+- Cada test (en la ubicación de tests del área) debe poder mapearse a un `R<n>` de su spec.
 - Cada `R<n>` debe tener al menos un test concreto.
 - El `reviewer` comprueba esta correspondencia explícitamente y rechaza
   si falta.
@@ -136,7 +136,7 @@ mismos 3 archivos de spec, pero el **contenido obligatorio** cambia:
 **feature**
 ```
 ## R1
-CUANDO el usuario ejecuta `node src/cli.ts recent`, el sistema DEBE imprimir
+CUANDO el usuario ejecuta el comando `recent`, el sistema DEBE imprimir
 hasta 5 notas ordenadas por `created_at` descendente.
 ```
 
@@ -167,25 +167,42 @@ El sistema DEBE preservar la conducta observable de los comandos `add`/`list`
   público** (firmas/APIs visibles) queda intacto. Si hay que cambiarlo, es una
   feature, no un refactor.
 
-## Monorepo: áreas y conocimiento
+## Áreas y conocimiento (area-first)
 
-En un monorepo, cada subproyecto (`frontend`, `backend`, `apis/<x>`) es un
-**área** con sus propios patrones, convenciones y tests. El harness coordina
-desde la raíz.
+El arnés es **area-first**: el trabajo se organiza por **áreas**, cada una con
+sus propios patrones, convenciones, skills y comando de verificación. Una área
+puede ser un subproyecto de un monorepo (`frontend`, `backend`, `apis/<x>`) o
+simplemente el proyecto entero como una sola área. El harness coordina desde la
+raíz. **Siempre** existe al menos un área (`init.sh` falla si `rules.areas`
+está vacío).
 
 ### Registro de áreas (`backlog.json`)
+
+Cada área se autodescribe:
 
 ```json
 "rules": {
   "areas": [
-    { "name": "backend", "path": "backend", "docs": "docs/backend", "test": "npm --prefix backend test" }
+    {
+      "name": "backend",
+      "path": "backend",
+      "docs": "docs/backend",
+      "skills": "docs/backend/skills/SKILLS.md",
+      "verify": "npm --prefix backend test"
+    }
   ]
 }
 ```
 
-Cada ítem declara su(s) área(s) (multi-valor): `"area": ["backend"]`.
-Si `rules.areas` está vacío, el repo opera en **modo proyecto-único** (docs
-raíz, `node --test`) y `area` es opcional.
+- `name`, `path`, `docs` — obligatorios.
+- `skills` — índice de skills del área (debe existir). Si se omite el campo, se
+  asume `docs/<área>/skills/SKILLS.md`. Puede apuntar a un índice externo (p. ej.
+  uno que liste skills de `.claude/skills/`) en vez de duplicar conocimiento.
+- `verify` — comando de verificación del área (cualquier comando: tests, lint,
+  build…). Se acepta `test` como alias legacy.
+
+Cada ítem declara su(s) área(s) (multi-valor): `"area": ["backend"]`. El `area`
+de un ítem debe pertenecer a `rules.areas`.
 
 ### Conocimiento por área
 

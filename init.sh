@@ -4,6 +4,11 @@
 # Este script lo ejecuta el agente al COMENZAR una sesión y antes de
 # declarar cualquier tarea como `done`. Si falla, la sesión no debe avanzar.
 #
+# El arnés es agnóstico de lenguaje y *area-first*: NO asume Node como runtime
+# de tu proyecto. Cada área de `backlog.json` define su propio comando `verify`.
+# `node` se usa aquí solo como herramienta interna del arnés para validar
+# `backlog.json` y los specs.
+#
 # Salida esperada: códigos de salida claros y bloques marcados con [OK]/[FAIL].
 
 set -u
@@ -20,20 +25,13 @@ EXIT_CODE=0
 
 echo "── 1. Verificando entorno ─────────────────────────────"
 
-# Node disponible
+# node es la herramienta interna del arnés (valida backlog.json y specs).
+# NO es el runtime de tu proyecto: cada área define su propio `verify`.
 if ! command -v node >/dev/null 2>&1; then
-  fail "node no está instalado"
+  fail "node no está disponible (el arnés lo usa para validar backlog.json)"
   exit 1
 fi
-ok "node -> $(node --version)"
-
-# Versión mínima 22 (ejecución nativa de TypeScript + node --test, cero deps)
-NODE_MAJOR=$(node -e 'process.stdout.write(String(process.versions.node.split(".")[0]))')
-if [ "$NODE_MAJOR" -lt 22 ]; then
-  fail "Se requiere Node >= 22 (ejecución nativa de TypeScript)"
-  exit 1
-fi
-ok "Versión de Node compatible"
+ok "node (herramienta del arnés) -> $(node --version)"
 
 echo ""
 echo "── 2. Verificando archivos base del arnés ──────────────"
@@ -48,7 +46,7 @@ for f in AGENTS.md backlog.json progress/current.md docs/architecture.md docs/co
 done
 
 echo ""
-echo "── 3. Validando backlog.json y specs ─────────────"
+echo "── 3. Validando backlog.json, áreas y specs ────────────"
 
 node <<'JS'
 const fs = require("fs");
@@ -69,13 +67,30 @@ if (inProgress.length > 1) {
   process.exit(1);
 }
 const specErrors = [];
+
+// El arnés es area-first: SIEMPRE debe existir al menos un área.
 const areas = Array.isArray(data.rules?.areas) ? data.rules.areas : [];
+if (areas.length === 0) {
+  console.log("[FAIL]  rules.areas está vacío: el arnés exige al menos un área (modo area-first)");
+  process.exit(1);
+}
 const areaNames = new Set(areas.map((a) => a.name));
 for (const a of areas) {
-  for (const f of ["conventions.md", "skills/SKILLS.md"]) {
-    if (!fs.existsSync(`${a.docs}/${f}`)) {
-      specErrors.push(`área ${a.name} sin ${a.docs}/${f}`);
-    }
+  if (!a.name || !a.path || !a.docs) {
+    specErrors.push(`área inválida (requiere name, path, docs): ${JSON.stringify(a)}`);
+    continue;
+  }
+  // Cada área exige su conocimiento: conventions.md + un índice de skills.
+  const skillsIndex = a.skills || `${a.docs}/skills/SKILLS.md`;
+  if (!fs.existsSync(`${a.docs}/conventions.md`)) {
+    specErrors.push(`área ${a.name} sin ${a.docs}/conventions.md`);
+  }
+  if (!fs.existsSync(skillsIndex)) {
+    specErrors.push(`área ${a.name} sin índice de skills (${skillsIndex})`);
+  }
+  // Cada área exige cómo se verifica.
+  if (!a.verify && !a.test) {
+    specErrors.push(`área ${a.name} sin comando 'verify'`);
   }
 }
 for (const it of items) {
@@ -90,7 +105,7 @@ for (const it of items) {
   }
   const itemAreas = Array.isArray(it.area) ? it.area : (it.area ? [it.area] : []);
   for (const an of itemAreas) {
-    if (areaNames.size && !areaNames.has(an)) {
+    if (!areaNames.has(an)) {
       console.log(`[FAIL]  item ${it.id} con área desconocida: ${an}`);
       process.exit(1);
     }
@@ -109,35 +124,29 @@ if (specErrors.length) {
   process.exit(1);
 }
 console.log(`[OK]    backlog.json válido (${items.length} items, ${areas.length} áreas)`);
+console.log("[OK]    Cada área tiene conventions + skills + verify");
 console.log("[OK]    Specs presentes para items sdd con estado no-pending");
 JS
 
 if [ $? -ne 0 ]; then EXIT_CODE=1; fi
 
 echo ""
-echo "── 4. Ejecutando tests ─────────────────────────────────"
+echo "── 4. Verificando áreas (verify) ───────────────────────"
 
-AREAS_TESTS=$(node -e 'const d=require("./backlog.json");(d.rules&&d.rules.areas||[]).forEach(a=>{if(a.test)console.log(a.name+"\t"+a.test)})')
+AREAS_TESTS=$(node -e 'const d=require("./backlog.json");(d.rules&&d.rules.areas||[]).forEach(a=>{const c=a.verify||a.test;if(c)console.log(a.name+"\t"+c)})')
 
 if [ -n "$AREAS_TESTS" ]; then
   while IFS=$'\t' read -r area_name area_cmd; do
     echo "  [$area_name] $area_cmd"
     if eval "$area_cmd"; then
-      ok "tests [$area_name] verdes"
+      ok "verify [$area_name] verde"
     else
-      fail "tests [$area_name] rojos"
+      fail "verify [$area_name] rojo"
       EXIT_CODE=1
     fi
   done <<< "$AREAS_TESTS"
-elif [ -d "tests" ] && ls tests/*.* >/dev/null 2>&1; then
-  if node --test "tests/**/*.test.{js,mjs,cjs,ts}" 2>&1; then
-    ok "Todos los tests pasan"
-  else
-    fail "Hay tests rotos"
-    EXIT_CODE=1
-  fi
 else
-  warn "Sin áreas con test ni carpeta tests/ todavía"
+  warn "Ningún área define 'verify' todavía"
 fi
 
 echo ""

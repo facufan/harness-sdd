@@ -7,7 +7,15 @@
     "require_approved_spec_to_implement": true,
     "valid_status": ["pending", "spec_ready", "in_progress", "done", "blocked"],
     "valid_types": ["feature", "bug", "refactor"],
-    "areas": [],
+    "areas": [
+      {
+        "name": "core",
+        "path": ".",
+        "docs": "docs/core",
+        "skills": "docs/core/skills/SKILLS.md",
+        "verify": "echo 'TODO: reemplaza por el comando de verificación real de esta área'"
+      }
+    ],
     "sdd_required_when": "feature has \"sdd\": true"
   },
   "items": []

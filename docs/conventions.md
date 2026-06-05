@@ -1,85 +1,54 @@
-# Convenciones de código
+# Convenciones de código (genéricas)
 
 > Homogeneidad extrema. La IA predice mejor cuando el repositorio se parece
 > a sí mismo en todas partes.
+>
+> **Este archivo define principios agnósticos de lenguaje.** Lo específico de
+> cada lenguaje/framework (runtime, build, runner de tests, imports, estilo
+> concreto) vive en `docs/<área>/conventions.md`. Cuando un principio de aquí
+> y la convención de un área choquen, **manda la del área**.
 
-## Estilo TypeScript / Node.js
+## Principios
 
-- **Runtime:** Node.js 22.6+ ejecuta archivos `.ts` de forma nativa (type
-  stripping). **Sin paso de build, sin `tsconfig.json`, sin `package.json`.**
-  Los tipos se borran en ejecución; sirven como contrato y documentación.
-- **Módulos:** ES modules (`import`/`export`). Imports locales con extensión
-  explícita `.ts`.
-- **Formato:** indentación de 2 espacios. Líneas máximo 100 caracteres.
-- **Punto y coma:** siempre.
-- **Imports:** built-ins de Node primero (`node:fs`, `node:path`...), luego
-  locales. Una importación por línea.
-- **Strings:** comillas dobles `"..."` siempre. Backticks solo para
-  interpolación o multilínea.
-- **Template literals** para interpolación. Nada de concatenación con `+`
-  cuando hay variables.
-- **`const` por defecto.** `let` solo si la variable se reasigna. Nunca `var`.
-
-## Tipado
-
-- **Tipa los límites públicos.** Toda función/clase exportada lleva tipos
-  explícitos en parámetros y retorno.
-- **Modela el dominio con `interface` / `type`** en lugar de objetos sueltos.
-- **Evita `any`.** Si es inevitable, justifícalo con un comentario. Prefiere
-  `unknown` y estrecha el tipo.
-- Recuerda: el type stripping de Node **no comprueba tipos**, solo los borra.
-  Los tipos son contrato y guía para la IA; la verificación real son los tests.
+- **Homogeneidad.** Imita el código existente del área antes de inventar un
+  estilo nuevo. Mismo patrón en todas partes > preferencia personal.
+- **Límites públicos explícitos.** Toda función/clase/módulo exportado declara
+  su contrato (tipos/firmas/documentación según el lenguaje lo permita).
+- **Modela el dominio.** Representa los conceptos del dominio con tipos/estructuras
+  nombradas, no con datos sueltos sin forma.
+- **Errores explícitos.** Lo que puede fallar (recurso inexistente, datos
+  corruptos) lanza/retorna un error nombrado, no un valor silencioso ambiguo.
+- **Inmutabilidad por defecto.** Evita mutar estado compartido; prefiere crear
+  nuevas instancias cuando sea razonable en el lenguaje.
+- **Mínima superficie de dependencias.** Una dependencia nueva se discute
+  (estado `blocked`) antes de añadirse.
 
 ## Nombres
 
-| Tipo                       | Convención        | Ejemplo               |
-|----------------------------|-------------------|-----------------------|
-| Archivos / módulos         | `kebab-case`      | `note-store.ts`       |
-| Clases / interfaces / types| `PascalCase`      | `Note`, `NoteInput`   |
-| Funciones / variables      | `camelCase`       | `loadNotes`           |
-| Constantes                 | `UPPER_SNAKE`     | `DEFAULT_NOTES_PATH`  |
-| Privadas                   | prefijo `_`       | `_atomicWrite`        |
-
-## Estructura de archivo
-
-Cada archivo en `src/` empieza con:
-
-```typescript
-// Una línea describiendo el propósito del módulo.
-
-// imports de Node
-import fs from "node:fs";
-import path from "node:path";
-
-// imports locales
-import { Note } from "./note.ts";
-```
+- Sé consistente con la convención del área (`camelCase`, `snake_case`,
+  `PascalCase`, etc.). No mezcles convenciones dentro de la misma área.
+- Nombres descriptivos que hagan innecesario el comentario.
 
 ## Tests
 
-- Un archivo de test por módulo: `tests/<módulo>.test.ts`.
-- Un bloque `describe("<Cosa>", ...)` por unidad lógica, con `test(...)` dentro
-  (usando el runner integrado `node:test` y `node:assert`).
-- Cada test que toca disco usa un directorio temporal real
-  (`fs.mkdtempSync(path.join(os.tmpdir(), ...))`) y limpia tras de sí.
-- Nombres de test descriptivos: `"load devuelve [] cuando el archivo no existe"`.
-- Se ejecutan con `node --test tests/` (sin dependencias externas).
-
-## Manejo de errores
-
-Errores del dominio como clases nombradas que extienden `Error`:
-
-```typescript
-export class NoteError extends Error {}
-
-export class NoteNotFound extends NoteError {}
-```
-
-La interfaz (CLI/servidor) captura los errores del dominio, escribe el mensaje
-en `stderr` y sale con código != 0. Nunca propaga stack traces al usuario.
+- **Un test por unidad lógica**, ubicado donde el área lo establezca
+  (`docs/<área>/conventions.md`).
+- Los tests verifican **resultados concretos**, no solo "que no lanza error".
+- Evita mockear lo que puedas ejercitar de verdad (filesystem, etc.): usa
+  recursos temporales reales y límpialos.
+- Se ejecutan con el comando `verify` del área (`rules.areas[].verify`).
 
 ## Comentarios
 
-Por defecto **no** se escriben. Solo se permiten cuando explican un *por qué*
-no obvio (p. ej. workaround documentado, invariante sutil). Los nombres deben
-hacer el resto.
+Por defecto **no** se escriben. Solo cuando explican un *por qué* no obvio
+(workaround documentado, invariante sutil). Los nombres hacen el resto.
+
+## Específico por área
+
+Cada área documenta en `docs/<área>/conventions.md`:
+
+- Lenguaje + versión + gestor de paquetes / build.
+- Estructura de carpetas (dónde vive el código y los tests del área).
+- Estilo concreto (indentación, comillas, longitud de línea, linter/formatter).
+- Manejo de errores idiomático del lenguaje.
+- El comando `verify` exacto.

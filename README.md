@@ -4,9 +4,10 @@ Un **arnés (harness)** para desarrollar software con agentes de IA de forma
 autónoma, verificable y reproducible. No es una aplicación: es la **estructura**
 que permite que un agente trabaje sobre tu proyecto sin perderse.
 
-Está orientado a proyectos **Node.js / TypeScript** (Node 22+, que ejecuta `.ts`
-de forma nativa). **No incluye `package.json` ni build step**: tú añades tu
-proyecto encima del framework.
+Es **agnóstico de lenguaje** y *area-first*: no asume ningún runtime para tu
+proyecto. Tú añades tu código encima y declaras cada **área** —con su comando
+de verificación y sus skills— en `backlog.json`. (`node` se usa solo como
+herramienta interna del arnés para validar `backlog.json` y los specs.)
 
 > El framework viene vacío de código a propósito. Lo importante no es *qué*
 > construyes, sino *cómo* está estructurado el repo para que un agente pueda
@@ -19,7 +20,7 @@ proyecto encima del framework.
 | **1. El repositorio ES el sistema**    | `AGENTS.md`, `init.sh`, `backlog.json`, `specs/`, `progress/`, `docs/`      |
 | **2. Orquestación multi-agente**       | `.claude/agents/leader.md`, `spec_author.md`, `implementer.md`, `reviewer.md`    |
 | **3. Spec Driven Development**         | `docs/specs.md`, EARS notation, puerta de aprobación humana en `spec_ready`      |
-| **4. Supervisión y mejora**            | `CHECKPOINTS.md`, hooks en `.claude/settings.json`, `tests/`                     |
+| **4. Supervisión y mejora**            | `CHECKPOINTS.md`, hooks en `.claude/settings.json`, `verify` por área            |
 
 ## Para empezar
 
@@ -27,8 +28,8 @@ proyecto encima del framework.
 ./init.sh
 ```
 
-Verifica el entorno (Node 22+), valida `backlog.json` y corre los tests si
-existen. Si todo está verde, abre `AGENTS.md` y sigue desde ahí.
+Verifica el entorno, valida `backlog.json` y las áreas, y corre el `verify`
+de cada área. Si todo está verde, abre `AGENTS.md` y sigue desde ahí.
 
 ## Cómo usarlo con Claude Code
 
@@ -39,8 +40,9 @@ Driven Development.
 Receta:
 
 1. `./init.sh` — debe terminar verde.
-2. Describe tu proyecto en `backlog.json` (`project`, `description`) y
-   define tu arquitectura en `docs/architecture.md`.
+2. Describe tu proyecto en `backlog.json` (`project`, `description`), define
+   tus **áreas** en `rules.areas` (cada una con `path`, `docs`, `skills`,
+   `verify`) y tu arquitectura en `docs/architecture.md`.
 3. Añade tu primera tarea en `backlog.json` con `status: "pending"`,
    `"sdd": true` y un `type` (`feature`, `bug` o `refactor`); sigue la forma
    documentada en `docs/specs.md`.
@@ -99,14 +101,15 @@ por chat, vive en disco y queda versionado.
 │   └── history.md         # Bitácora append-only
 ├── docs/
 │   ├── architecture.md    # Qué significa "buen trabajo" (plantilla a rellenar)
-│   ├── conventions.md     # Estilo TS/Node, nombres, errores
+│   ├── conventions.md     # Principios genéricos (agnóstico de lenguaje)
 │   ├── specs.md           # Proceso SDD: EARS, 3 archivos, aprobación humana
-│   └── verification.md    # Cómo demostrar que funciona
+│   ├── verification.md    # Cómo demostrar que funciona
+│   └── <área>/            # Por área: conventions.md + skills/SKILLS.md
 ├── .claude/
 │   ├── agents/            # leader, spec_author, implementer, reviewer
 │   └── settings.json      # Hooks que automatizan la verificación
-├── src/                   # Tu código (lo creas tú)
-└── tests/                 # Tus tests (los creas tú)
+├── <path-de-área>/        # Tu código por área (lo creas tú; ver rules.areas[].path)
+└── ...                    # Tus tests donde cada área los ubique
 ```
 
 ## Aprendizajes que ilustra este arnés
@@ -119,8 +122,8 @@ por chat, vive en disco y queda versionado.
   tasks → code, con una puerta de aprobación humana antes de tocar código.
 - **Estado en disco**, no en chat: `specs/`, `progress/current.md` y
   `history.md` sobreviven a reinicios y context windows reventadas.
-- **Verificación ejecutable**: `init.sh` corre los tests reales y valida
-  la presencia de specs para toda feature SDD.
+- **Verificación ejecutable**: `init.sh` corre el `verify` de cada área y
+  valida la presencia de specs para toda feature SDD.
 - **Trazabilidad obligatoria**: cada `R<n>` se mapea a un test concreto;
   el reviewer rechaza si falta.
 - **Patrón Leader-Spec-Implementer-Reviewer**: el leader no implementa,
