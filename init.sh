@@ -69,6 +69,15 @@ if (inProgress.length > 1) {
   process.exit(1);
 }
 const specErrors = [];
+const areas = Array.isArray(data.rules?.areas) ? data.rules.areas : [];
+const areaNames = new Set(areas.map((a) => a.name));
+for (const a of areas) {
+  for (const f of ["conventions.md", "skills/SKILLS.md"]) {
+    if (!fs.existsSync(`${a.docs}/${f}`)) {
+      specErrors.push(`área ${a.name} sin ${a.docs}/${f}`);
+    }
+  }
+}
 for (const it of items) {
   if (!valid.has(it.status)) {
     console.log(`[FAIL]  Estado inválido en item ${it.id}: ${it.status}`);
@@ -78,6 +87,13 @@ for (const it of items) {
   if (!validTypes.has(type)) {
     console.log(`[FAIL]  Tipo inválido en item ${it.id}: ${type}`);
     process.exit(1);
+  }
+  const itemAreas = Array.isArray(it.area) ? it.area : (it.area ? [it.area] : []);
+  for (const an of itemAreas) {
+    if (areaNames.size && !areaNames.has(an)) {
+      console.log(`[FAIL]  item ${it.id} con área desconocida: ${an}`);
+      process.exit(1);
+    }
   }
   if (it.sdd && requiresSpec.has(it.status)) {
     const specDir = `specs/${it.name}`;
@@ -92,7 +108,7 @@ if (specErrors.length) {
   for (const e of specErrors) console.log(`[FAIL]  ${e}`);
   process.exit(1);
 }
-console.log(`[OK]    backlog.json válido (${items.length} items)`);
+console.log(`[OK]    backlog.json válido (${items.length} items, ${areas.length} áreas)`);
 console.log("[OK]    Specs presentes para items sdd con estado no-pending");
 JS
 
@@ -101,15 +117,27 @@ if [ $? -ne 0 ]; then EXIT_CODE=1; fi
 echo ""
 echo "── 4. Ejecutando tests ─────────────────────────────────"
 
-if [ -d "tests" ] && ls tests/*.* >/dev/null 2>&1; then
-  if node --test tests/ 2>&1; then
+AREAS_TESTS=$(node -e 'const d=require("./backlog.json");(d.rules&&d.rules.areas||[]).forEach(a=>{if(a.test)console.log(a.name+"\t"+a.test)})')
+
+if [ -n "$AREAS_TESTS" ]; then
+  while IFS=$'\t' read -r area_name area_cmd; do
+    echo "  [$area_name] $area_cmd"
+    if eval "$area_cmd"; then
+      ok "tests [$area_name] verdes"
+    else
+      fail "tests [$area_name] rojos"
+      EXIT_CODE=1
+    fi
+  done <<< "$AREAS_TESTS"
+elif [ -d "tests" ] && ls tests/*.* >/dev/null 2>&1; then
+  if node --test "tests/**/*.test.{js,mjs,cjs,ts}" 2>&1; then
     ok "Todos los tests pasan"
   else
     fail "Hay tests rotos"
     EXIT_CODE=1
   fi
 else
-  warn "Carpeta tests/ vacía o inexistente todavía"
+  warn "Sin áreas con test ni carpeta tests/ todavía"
 fi
 
 echo ""

@@ -58,6 +58,15 @@
 - [ ] Todo `refactor` `done` mantiene los tests existentes verdes sin aserciones
       modificadas y el contrato público intacto.
 
+## C8 — Conformidad por área (monorepo)
+
+- [ ] Todo `area` de cada ítem ∈ `rules.areas` de `backlog.json`.
+- [ ] Cada área registrada tiene `docs/<área>/conventions.md` y
+      `docs/<área>/skills/SKILLS.md`.
+- [ ] Todo ítem `done` con `area` tiene sección `## Conformidad` en su
+      `design.md` con skills + patrón (`archivo:línea`) reales.
+- [ ] Los tests del área de la tarea pasan (`rules.areas[].test`).
+
 ---
 
 **Cómo usar este archivo:** un agente revisor (`.claude/agents/reviewer.md`)

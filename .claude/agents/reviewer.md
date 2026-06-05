@@ -35,6 +35,12 @@ cambios. No editas código.
      modificadas** para conducta nueva y `requirements.md` no introduce conducta
      nueva; (b) el **contrato público** (firmas/APIs visibles) está intacto en
      el diff. Si cambió → rechaza: "esto es una feature, no un refactor".
+7c. **Conformidad por área** (si el ítem tiene `area`; rechaza si falla):
+   - el `design.md` tiene la sección `## Conformidad` con skills + patrón citados;
+   - cada skill citada existe en el `SKILLS.md` del área;
+   - cada `archivo:línea` citado apunta a código real;
+   - el código nuevo respeta `docs/<área>/conventions.md` (desvíos solo con
+     justificación escrita en `## Conformidad`).
 8. Emite veredicto.
 
 ## Formato del veredicto
@@ -90,4 +96,6 @@ CHANGES_REQUESTED -> progress/review_<name>.md
   `progress/impl_<name>.md`.
 - ❌ (refactor) Nunca apruebes si cambió el contrato público o si se modificaron
   aserciones para acomodar conducta nueva.
+- ❌ (área) Nunca apruebes si falta `## Conformidad`, si una skill/cita no
+  existe, o si hay desvío de convención del área sin justificar.
 - ✅ Sé concreto: cita líneas y archivos. Nada de feedback genérico.

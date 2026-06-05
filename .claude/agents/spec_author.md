@@ -32,11 +32,18 @@ ni `tests/`. Si lo haces, el reviewer rechaza la feature.
      objetivo estructural, **sin** requirements de conducta nueva; `design.md`
      nombra el **contrato público que se preserva**; `tasks.md` pone como **T1**
      asegurar tests de caracterización verdes antes de refactorizar.
+2c. Si el ítem tiene `area`, lee por cada área `docs/<área>/conventions.md` y
+   `docs/<área>/skills/SKILLS.md`. Elige la(s) skill(s) aplicable(s) por su
+   "cuándo". **Detecta el patrón existente**: localiza en el código del área el
+   ejemplo real más cercano a lo que vas a implementar (con `archivo:línea`).
 3. Redacta `requirements.md` en **EARS estricto** (ver `docs/specs.md`).
    Cada criterio del `acceptance` original DEBE estar cubierto por al menos
    un `R<n>`. Numera de forma estable.
 4. Redacta `design.md`: archivos a tocar, firmas nuevas, excepciones,
    alternativa descartada con justificación.
+   Si el ítem tiene `area`, incluye una sección **`## Conformidad`** con: skills
+   seguidas (por nombre), patrón imitado (`archivo:línea` de un ejemplo real) y
+   desvíos justificados (o "ninguno").
 5. Redacta `tasks.md`: pasos discretos en orden, cada uno con `[ ]` y la
    lista de `R<n>` que cubre.
 6. Cambia el `status` de esa feature a `spec_ready` en `backlog.json`.

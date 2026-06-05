@@ -167,6 +167,57 @@ El sistema DEBE preservar la conducta observable de los comandos `add`/`list`
   público** (firmas/APIs visibles) queda intacto. Si hay que cambiarlo, es una
   feature, no un refactor.
 
+## Monorepo: áreas y conocimiento
+
+En un monorepo, cada subproyecto (`frontend`, `backend`, `apis/<x>`) es un
+**área** con sus propios patrones, convenciones y tests. El harness coordina
+desde la raíz.
+
+### Registro de áreas (`backlog.json`)
+
+```json
+"rules": {
+  "areas": [
+    { "name": "backend", "path": "backend", "docs": "docs/backend", "test": "npm --prefix backend test" }
+  ]
+}
+```
+
+Cada ítem declara su(s) área(s) (multi-valor): `"area": ["backend"]`.
+Si `rules.areas` está vacío, el repo opera en **modo proyecto-único** (docs
+raíz, `node --test`) y `area` es opcional.
+
+### Conocimiento por área
+
+Cada área tiene `docs/<área>/conventions.md` (estilo/patrones del área) y
+`docs/<área>/skills/` con un índice `SKILLS.md` y las skills:
+
+```markdown
+---
+name: add-endpoint
+when: "Cuando agregás un endpoint HTTP nuevo al backend"
+---
+# Cómo agregar un endpoint (backend)
+Pasos + ejemplo real: `backend/src/routes/users.ts:12`.
+```
+
+`SKILLS.md` es el índice que el agente lee para elegir la skill por su "cuándo".
+
+### Sección `## Conformidad` (obligatoria en `design.md` cuando el ítem tiene `area`)
+
+El `design.md` debe incluir:
+
+```markdown
+## Conformidad
+- Skills seguidas: `add-endpoint` (docs/backend/skills/add-endpoint.md)
+- Patrón imitado: `backend/src/routes/users.ts:12` (estructura de router)
+- Desvíos: ninguno  (o: justificación explícita de cada desvío)
+```
+
+El `reviewer` rechaza si falta esta sección, si una skill citada no existe en el
+`SKILLS.md` del área, si el `archivo:línea` no apunta a código real, o si el
+código nuevo se desvía de las convenciones del área sin justificación.
+
 ## Cuándo NO aplica SDD
 
 Las features con `"sdd": false` o sin el campo `sdd` NO tienen spec. SDD solo
