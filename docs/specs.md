@@ -65,7 +65,7 @@ Ejemplo:
 
 ```markdown
 ## R1
-CUANDO el usuario ejecuta `python -m src.cli recent`, el sistema DEBE
+CUANDO el usuario ejecuta `node src/cli.ts recent`, el sistema DEBE
 imprimir hasta 5 notas ordenadas por `created_at` descendente.
 
 ## R2
@@ -94,10 +94,10 @@ menos un `R<n>` que cubre.
 Ejemplo:
 
 ```markdown
-- [ ] T1 — Añadir `cmd_recent` en `src/cli.py`. Cubre: R1, R3.
-- [ ] T2 — Registrar subparser `recent` con flag `--limit`. Cubre: R1, R2.
-- [ ] T3 — Añadir `test_recent_default_limit` en `tests/test_cli.py`. Cubre: R1.
-- [ ] T4 — Añadir `test_recent_invalid_limit` en `tests/test_cli.py`. Cubre: R2.
+- [ ] T1 — Añadir el comando `recent` en `src/cli.ts`. Cubre: R1, R3.
+- [ ] T2 — Parsear el flag `--limit` con validación. Cubre: R1, R2.
+- [ ] T3 — Añadir test "recent usa límite 5 por defecto" en `tests/cli.test.ts`. Cubre: R1.
+- [ ] T4 — Añadir test "recent rechaza límite <= 0" en `tests/cli.test.ts`. Cubre: R2.
 ```
 
 El `implementer` marca `[x]` cada task al completarla. El `reviewer`
@@ -114,12 +114,12 @@ El `implementer` documenta el mapa en `progress/impl_<name>.md`:
 
 ```markdown
 ## Trazabilidad
-- R1 → `test_recent_default_limit`
-- R2 → `test_recent_invalid_limit`
-- R3 → `test_recent_custom_limit`
+- R1 → `test "recent usa límite 5 por defecto"`
+- R2 → `test "recent rechaza límite <= 0"`
+- R3 → `test "recent acepta --limit custom"`
 ```
 
 ## Cuándo NO aplica SDD
 
-Las features con `"sdd": false` o sin el campo `sdd` (las legacy 1–6) NO
-tienen spec. SDD solo se aplica hacia adelante.
+Las features con `"sdd": false` o sin el campo `sdd` NO tienen spec. SDD solo
+se aplica a las features que lo declaran explícitamente.

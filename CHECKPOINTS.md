@@ -22,20 +22,18 @@
 ## C3 — El código respeta la arquitectura
 
 - [ ] `src/` solo contiene los módulos previstos en `docs/architecture.md`.
-- [ ] No hay dependencias externas en `requirements.txt` (debe estar vacío
-      o no existir).
-- [ ] No hay `print()` sueltos para debug, ni TODOs sin contexto.
+- [ ] No hay dependencias externas no justificadas (ver `docs/architecture.md`).
+- [ ] No hay logs de debug sueltos, ni TODOs sin contexto.
 
 ## C4 — La verificación es real
 
 - [ ] `tests/` tiene al menos un test por módulo de `src/`.
-- [ ] Los tests usan `tempfile.TemporaryDirectory()`, no mocks de fs.
-- [ ] `python3 -m unittest discover -s tests -v` muestra > 0 tests
-      y todos verdes.
+- [ ] Los tests usan un directorio temporal real (`fs.mkdtempSync`), no mocks de fs.
+- [ ] `node --test tests/` muestra > 0 tests y todos verdes.
 
 ## C5 — La sesión se cerró bien
 
-- [ ] No hay archivos sin trackear sospechosos (`*.tmp`, `__pycache__`
+- [ ] No hay archivos sin trackear sospechosos (`*.tmp`, `node_modules/`
       fuera del `.gitignore`).
 - [ ] `progress/history.md` tiene una entrada por la última sesión.
 - [ ] La última feature trabajada está reflejada en su estado correcto.

@@ -7,41 +7,47 @@
 
 ### Nivel 1 — Tests unitarios (obligatorio)
 
-Toda función pública en `src/` tiene al menos un test en `tests/` que:
+Toda función/método público en `src/` tiene al menos un test en `tests/` que:
 
 1. Cubre el camino feliz.
 2. Cubre al menos un camino de error si la función puede fallar.
 
 Comando:
 ```bash
-python3 -m unittest discover -s tests -v
+node --test tests/
 ```
 
 ### Nivel 2 — Test de integración del CLI (obligatorio para features de UI)
 
 Las features que añaden comandos al CLI se verifican ejecutando el CLI real
-contra un archivo temporal:
+contra un directorio temporal:
 
-```python
-import subprocess, tempfile, os
-with tempfile.TemporaryDirectory() as d:
-    env = {**os.environ, "NOTES_FILE": os.path.join(d, "notes.json")}
-    out = subprocess.check_output(
-        ["python3", "-m", "src.cli", "add", "hola", "--body", "mundo"],
-        env=env, text=True,
-    )
-    assert "id=" in out
+```typescript
+import { test } from "node:test";
+import assert from "node:assert";
+import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+test("add imprime el id creado", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "notes-"));
+  const env = { ...process.env, NOTES_FILE: path.join(dir, "notes.json") };
+  const out = execFileSync("node", ["src/cli.ts", "add", "hola", "--body", "mundo"], {
+    env,
+    encoding: "utf8",
+  });
+  assert.match(out, /id=/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
 ```
 
 ### Nivel 3 — Smoke test manual (opcional pero recomendado)
 
-Antes de cerrar la sesión, ejecuta un flujo end-to-end con un archivo
-temporal en `/tmp`:
+Antes de cerrar la sesión, ejecuta un flujo end-to-end con un archivo temporal:
 
 ```bash
-NOTES_FILE=/tmp/notes_demo.json python3 -m src.cli add "test" --body "x"
-NOTES_FILE=/tmp/notes_demo.json python3 -m src.cli list
-rm /tmp/notes_demo.json
+NOTES_FILE="$(mktemp).json" node src/cli.ts add "test" --body "x"
 ```
 
 ### Nivel 4 — Trazabilidad de requirements (obligatorio para features con `"sdd": true`)
@@ -53,17 +59,18 @@ El implementer documenta el mapa en `progress/impl_<name>.md`:
 
 ```markdown
 ## Trazabilidad
-- R1 → `test_recent_default_limit`
-- R2 → `test_recent_invalid_limit`
-- R3 → `test_recent_custom_limit`
+- R1 → `test "recent usa límite 5 por defecto"`
+- R2 → `test "recent rechaza límite <= 0"`
+- R3 → `test "recent acepta --limit custom"`
 ```
 
 ## Anti-patrones (no hacer)
 
 - ❌ "He añadido el comando, debería funcionar." → falta test ejecutable.
-- ❌ Test que solo verifica que la función no lanza excepción. → tiene que
+- ❌ Test que solo verifica que la función no lanza error. → tiene que
   comprobar el resultado concreto.
-- ❌ `mock` del filesystem. → usa `tempfile.TemporaryDirectory()` real.
+- ❌ Mockear el filesystem. → usa un directorio temporal real
+  (`fs.mkdtempSync`).
 - ❌ Marcar la feature como `done` sin pasar `./init.sh`.
 
 ## Verificación final antes de cerrar

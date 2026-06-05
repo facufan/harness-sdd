@@ -71,7 +71,7 @@ Antes de terminar:
 2. Si la tarea está acabada: marca `status: "done"` en `feature_list.json`.
 3. Mueve el resumen de `progress/current.md` al final de `progress/history.md`.
 4. Vacía `progress/current.md` dejando solo la plantilla.
-5. No dejes archivos temporales, ni `print()` de debug, ni TODOs sin contexto.
+5. No dejes archivos temporales, ni logs de debug, ni TODOs sin contexto.
 
 ## 6. Si te bloqueas
 

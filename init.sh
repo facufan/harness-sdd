@@ -20,20 +20,20 @@ EXIT_CODE=0
 
 echo "── 1. Verificando entorno ─────────────────────────────"
 
-# Python disponible
-if ! command -v python3 >/dev/null 2>&1; then
-  fail "python3 no está instalado"
+# Node disponible
+if ! command -v node >/dev/null 2>&1; then
+  fail "node no está instalado"
   exit 1
 fi
-ok "python3 -> $(python3 --version)"
+ok "node -> $(node --version)"
 
-# Versión mínima 3.9 (dataclasses + typing moderno)
-PY_VERSION_OK=$(python3 -c 'import sys; print(int(sys.version_info >= (3, 9)))')
-if [ "$PY_VERSION_OK" != "1" ]; then
-  fail "Se requiere Python >= 3.9"
+# Versión mínima 22 (ejecución nativa de TypeScript + node --test, cero deps)
+NODE_MAJOR=$(node -e 'process.stdout.write(String(process.versions.node.split(".")[0]))')
+if [ "$NODE_MAJOR" -lt 22 ]; then
+  fail "Se requiere Node >= 22 (ejecución nativa de TypeScript)"
   exit 1
 fi
-ok "Versión de Python compatible"
+ok "Versión de Node compatible"
 
 echo ""
 echo "── 2. Verificando archivos base del arnés ──────────────"
@@ -50,56 +50,60 @@ done
 echo ""
 echo "── 3. Validando feature_list.json y specs ─────────────"
 
-python3 - <<'PY'
-import json, os, sys
-try:
-    data = json.load(open("feature_list.json"))
-    valid = {"pending", "spec_ready", "in_progress", "done", "blocked"}
-    in_progress = [f for f in data["features"] if f["status"] == "in_progress"]
-    if len(in_progress) > 1:
-        print(f"[FAIL]  Hay {len(in_progress)} features en in_progress (máximo 1)")
-        sys.exit(1)
-    requires_spec = {"spec_ready", "in_progress", "done"}
-    spec_errors = []
-    for f in data["features"]:
-        if f["status"] not in valid:
-            print(f"[FAIL]  Estado inválido en feature {f['id']}: {f['status']}")
-            sys.exit(1)
-        if f.get("sdd") and f["status"] in requires_spec:
-            spec_dir = os.path.join("specs", f["name"])
-            for fname in ("requirements.md", "design.md", "tasks.md"):
-                if not os.path.isfile(os.path.join(spec_dir, fname)):
-                    spec_errors.append(
-                        f"feature {f['id']} ({f['name']}) en {f['status']} "
-                        f"sin {spec_dir}/{fname}"
-                    )
-    if spec_errors:
-        for e in spec_errors:
-            print(f"[FAIL]  {e}")
-        sys.exit(1)
-    print(f"[OK]    feature_list.json válido ({len(data['features'])} features)")
-    print(f"[OK]    Specs presentes para features sdd con estado no-pending")
-except SystemExit:
-    raise
-except Exception as e:
-    print(f"[FAIL]  feature_list.json o specs inválidos: {e}")
-    sys.exit(1)
-PY
+node <<'JS'
+const fs = require("fs");
+let data;
+try {
+  data = JSON.parse(fs.readFileSync("feature_list.json", "utf8"));
+} catch (e) {
+  console.log("[FAIL]  feature_list.json o specs inválidos: " + e.message);
+  process.exit(1);
+}
+const valid = new Set(["pending", "spec_ready", "in_progress", "done", "blocked"]);
+const requiresSpec = new Set(["spec_ready", "in_progress", "done"]);
+const features = Array.isArray(data.features) ? data.features : [];
+const inProgress = features.filter((f) => f.status === "in_progress");
+if (inProgress.length > 1) {
+  console.log(`[FAIL]  Hay ${inProgress.length} features en in_progress (máximo 1)`);
+  process.exit(1);
+}
+const specErrors = [];
+for (const f of features) {
+  if (!valid.has(f.status)) {
+    console.log(`[FAIL]  Estado inválido en feature ${f.id}: ${f.status}`);
+    process.exit(1);
+  }
+  if (f.sdd && requiresSpec.has(f.status)) {
+    const specDir = `specs/${f.name}`;
+    for (const fname of ["requirements.md", "design.md", "tasks.md"]) {
+      if (!fs.existsSync(`${specDir}/${fname}`)) {
+        specErrors.push(`feature ${f.id} (${f.name}) en ${f.status} sin ${specDir}/${fname}`);
+      }
+    }
+  }
+}
+if (specErrors.length) {
+  for (const e of specErrors) console.log(`[FAIL]  ${e}`);
+  process.exit(1);
+}
+console.log(`[OK]    feature_list.json válido (${features.length} features)`);
+console.log("[OK]    Specs presentes para features sdd con estado no-pending");
+JS
 
 if [ $? -ne 0 ]; then EXIT_CODE=1; fi
 
 echo ""
 echo "── 4. Ejecutando tests ─────────────────────────────────"
 
-if [ -d "tests" ]; then
-  if python3 -m unittest discover -s tests -v 2>&1; then
+if [ -d "tests" ] && ls tests/*.* >/dev/null 2>&1; then
+  if node --test tests/ 2>&1; then
     ok "Todos los tests pasan"
   else
     fail "Hay tests rotos"
     EXIT_CODE=1
   fi
 else
-  warn "Carpeta tests/ no existe todavía"
+  warn "Carpeta tests/ vacía o inexistente todavía"
 fi
 
 echo ""

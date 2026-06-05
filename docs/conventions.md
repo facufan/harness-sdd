@@ -3,62 +3,80 @@
 > Homogeneidad extrema. La IA predice mejor cuando el repositorio se parece
 > a sí mismo en todas partes.
 
-## Estilo Python
+## Estilo TypeScript / Node.js
 
-- **Versión:** Python 3.9+ (sintaxis `list[str]` permitida).
-- **Formato:** PEP 8. Líneas máximo 100 caracteres.
-- **Imports:** stdlib primero, luego locales. Una línea por módulo.
-- **Strings:** comillas dobles `"..."` siempre. Comillas simples solo
-  para escapar comillas dobles dentro.
-- **f-strings** para interpolación. Nada de `.format()` ni `%`.
+- **Runtime:** Node.js 22.6+ ejecuta archivos `.ts` de forma nativa (type
+  stripping). **Sin paso de build, sin `tsconfig.json`, sin `package.json`.**
+  Los tipos se borran en ejecución; sirven como contrato y documentación.
+- **Módulos:** ES modules (`import`/`export`). Imports locales con extensión
+  explícita `.ts`.
+- **Formato:** indentación de 2 espacios. Líneas máximo 100 caracteres.
+- **Punto y coma:** siempre.
+- **Imports:** built-ins de Node primero (`node:fs`, `node:path`...), luego
+  locales. Una importación por línea.
+- **Strings:** comillas dobles `"..."` siempre. Backticks solo para
+  interpolación o multilínea.
+- **Template literals** para interpolación. Nada de concatenación con `+`
+  cuando hay variables.
+- **`const` por defecto.** `let` solo si la variable se reasigna. Nunca `var`.
+
+## Tipado
+
+- **Tipa los límites públicos.** Toda función/clase exportada lleva tipos
+  explícitos en parámetros y retorno.
+- **Modela el dominio con `interface` / `type`** en lugar de objetos sueltos.
+- **Evita `any`.** Si es inevitable, justifícalo con un comentario. Prefiere
+  `unknown` y estrecha el tipo.
+- Recuerda: el type stripping de Node **no comprueba tipos**, solo los borra.
+  Los tipos son contrato y guía para la IA; la verificación real son los tests.
 
 ## Nombres
 
-| Tipo                    | Convención        | Ejemplo               |
-|-------------------------|-------------------|-----------------------|
-| Módulos                 | `snake_case`      | `notes.py`            |
-| Clases                  | `PascalCase`      | `Note`                |
-| Funciones / variables   | `snake_case`      | `load_notes`          |
-| Constantes              | `UPPER_SNAKE`     | `DEFAULT_NOTES_PATH`  |
-| Privadas                | prefijo `_`       | `_atomic_write`       |
+| Tipo                       | Convención        | Ejemplo               |
+|----------------------------|-------------------|-----------------------|
+| Archivos / módulos         | `kebab-case`      | `note-store.ts`       |
+| Clases / interfaces / types| `PascalCase`      | `Note`, `NoteInput`   |
+| Funciones / variables      | `camelCase`       | `loadNotes`           |
+| Constantes                 | `UPPER_SNAKE`     | `DEFAULT_NOTES_PATH`  |
+| Privadas                   | prefijo `_`       | `_atomicWrite`        |
 
 ## Estructura de archivo
 
 Cada archivo en `src/` empieza con:
 
-```python
-"""Una línea describiendo el propósito del módulo."""
-from __future__ import annotations
+```typescript
+// Una línea describiendo el propósito del módulo.
 
-# imports stdlib
-import json
-import os
+// imports de Node
+import fs from "node:fs";
+import path from "node:path";
 
-# imports locales
-from src.notes import Note
+// imports locales
+import { Note } from "./note.ts";
 ```
 
 ## Tests
 
-- Un archivo de test por módulo: `tests/test_<módulo>.py`.
-- Una clase `Test<Cosa>(unittest.TestCase)` por unidad lógica.
-- Cada test usa un `tempfile.TemporaryDirectory()` y limpia tras de sí.
-- Nombres de test descriptivos: `test_load_returns_empty_when_file_missing`.
+- Un archivo de test por módulo: `tests/<módulo>.test.ts`.
+- Un bloque `describe("<Cosa>", ...)` por unidad lógica, con `test(...)` dentro
+  (usando el runner integrado `node:test` y `node:assert`).
+- Cada test que toca disco usa un directorio temporal real
+  (`fs.mkdtempSync(path.join(os.tmpdir(), ...))`) y limpia tras de sí.
+- Nombres de test descriptivos: `"load devuelve [] cuando el archivo no existe"`.
+- Se ejecutan con `node --test tests/` (sin dependencias externas).
 
 ## Manejo de errores
 
-Excepciones del dominio en `src/notes.py`:
+Errores del dominio como clases nombradas que extienden `Error`:
 
-```python
-class NoteError(Exception):
-    """Base para errores del dominio."""
+```typescript
+export class NoteError extends Error {}
 
-class NoteNotFound(NoteError):
-    """Se lanza cuando se busca una nota inexistente."""
+export class NoteNotFound extends NoteError {}
 ```
 
-El CLI captura excepciones del dominio, imprime mensaje a `stderr` y sale
-con código 1. Nunca propaga stack traces al usuario.
+La interfaz (CLI/servidor) captura los errores del dominio, escribe el mensaje
+en `stderr` y sale con código != 0. Nunca propaga stack traces al usuario.
 
 ## Comentarios
 

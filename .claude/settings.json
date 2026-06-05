@@ -7,8 +7,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -m unittest discover -s tests -q 2>&1 | tail -3",
-            "description": "Tras editar o escribir archivos, corre los tests y muestra el resumen."
+            "command": "if [ -d tests ] && ls tests/*.* >/dev/null 2>&1; then node --test tests/ 2>&1 | tail -3; fi",
+            "description": "Tras editar o escribir archivos, corre los tests (si existen) y muestra el resumen."
           }
         ]
       }
@@ -28,8 +28,8 @@
   "permissions": {
     "allow": [
       "Bash(./init.sh)",
-      "Bash(python3 -m unittest*)",
-      "Bash(python3 -m src.cli*)"
+      "Bash(node --test*)",
+      "Bash(node -e*)"
     ]
   }
 }

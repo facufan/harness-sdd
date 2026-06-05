@@ -2,46 +2,47 @@
 
 > Este documento define el estándar de calidad. Los agentes revisores
 > evalúan código contra este archivo. Si no está aquí, no es un requisito.
+>
+> **Plantilla:** completa las secciones marcadas con `«...»` con la arquitectura
+> real de tu proyecto antes de empezar a implementar features.
 
 ## Principios
 
-1. **Capas claras.** El proyecto tiene tres capas y solo tres:
-   - `storage.py` — persistencia (JSON en disco).
-   - `notes.py` — modelo de dominio (`Note`).
-   - `cli.py` — interfaz de usuario (argparse).
-   No introducir capas adicionales (servicios, repositorios, ORMs) hasta que
+1. **Capas claras.** Define las capas de tu proyecto y respétalas. No
+   introduzcas capas adicionales (servicios, repositorios, ORMs) hasta que
    haya una razón concreta documentada en `feature_list.json`.
 
-2. **Sin dependencias externas.** Solo stdlib de Python. Si una feature
-   requiere una dependencia, primero se discute (estado `blocked`).
+   Capas de este proyecto:
+   - `«capa»` — «responsabilidad».
+   - `«capa»` — «responsabilidad».
 
-3. **Errores explícitos.** Las funciones que pueden fallar (id no existe,
-   archivo corrupto) lanzan excepciones nombradas, no devuelven `None`.
+2. **Dependencias bajo control.** Si una feature requiere una dependencia
+   externa, primero se discute (estado `blocked`). Mantén la superficie de
+   dependencias mínima y justificada.
 
-4. **Inmutabilidad por defecto.** `Note` es un `@dataclass(frozen=True)`.
-   Modificar = crear una nueva instancia.
+3. **Errores explícitos.** Las funciones que pueden fallar (recurso no existe,
+   datos corruptos) lanzan errores nombrados, no devuelven `null`/`undefined`
+   silenciosos.
 
-5. **Atomicidad en disco.** Toda escritura a `notes.json` se hace primero
-   en un archivo temporal y luego `os.replace()`. Nunca dejar el archivo
-   a medio escribir.
+4. **Inmutabilidad por defecto.** Modelos de dominio inmutables: modificar =
+   crear una nueva instancia. Evita mutar estado compartido.
+
+5. **Operaciones de IO seguras.** Toda escritura que pueda corromper datos se
+   hace de forma atómica (escribir a temporal + renombrar). Nunca dejes un
+   recurso a medio escribir.
 
 ## Flujo de datos
 
 ```
-usuario  ─→  cli.py (argparse)
-              │
-              ├─ construye Note con notes.Note.new(...)
-              │
-              └─→  storage.load() / storage.save()
-                       │
-                       └─→  .notes.json (en CWD)
+«describe aquí el flujo de datos de tu proyecto:
+ quién entra, qué transformaciones ocurren y dónde se persiste»
 ```
 
 ## Qué NO hacer
 
-- No usar `print()` para errores. Usa `sys.stderr` y exit code != 0.
-- No mezclar IO con lógica de dominio dentro de `notes.py`.
-- No leer/escribir el archivo en cada operación dentro de un bucle.
+- No usar la salida estándar para errores. Usa `stderr` y exit code != 0.
+- No mezclar IO con lógica de dominio en el mismo módulo.
+- No leer/escribir el recurso en cada operación dentro de un bucle.
   Carga al inicio, modifica en memoria, guarda al final.
-- No añadir un sistema de configuración. La ruta del archivo se pasa
-  explícitamente o usa la constante por defecto.
+- No añadir un sistema de configuración prematuro. Pasa las rutas/parámetros
+  explícitamente o usa una constante por defecto.

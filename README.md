@@ -1,13 +1,18 @@
-# ejemplo-harness — Notes CLI
+# harness-sdd — Framework de desarrollo con IA (Spec Driven)
 
-Proyecto de ejemplo que demuestra los principios de **Harness Engineering**
-aplicados a un CLI minimalista de notas en Python.
+Un **arnés (harness)** para desarrollar software con agentes de IA de forma
+autónoma, verificable y reproducible. No es una aplicación: es la **estructura**
+que permite que un agente trabaje sobre tu proyecto sin perderse.
 
-> El código de la aplicación es deliberadamente simple. Lo importante de
-> este repo no es **qué** hace, sino **cómo** está estructurado para que un
-> agente de IA pueda trabajar sobre él de forma autónoma y verificable.
+Está orientado a proyectos **Node.js / TypeScript** (Node 22+, que ejecuta `.ts`
+de forma nativa). **No incluye `package.json` ni build step**: tú añades tu
+proyecto encima del framework.
 
-## Cómo está organizado el arnés
+> El framework viene vacío de código a propósito. Lo importante no es *qué*
+> construyes, sino *cómo* está estructurado el repo para que un agente pueda
+> razonar y verificar su trabajo.
+
+## Los cuatro pilares
 
 | Pilar                                  | Manifestación en este repo                                                       |
 |----------------------------------------|----------------------------------------------------------------------------------|
@@ -22,34 +27,30 @@ aplicados a un CLI minimalista de notas en Python.
 ./init.sh
 ```
 
-Si todo está verde, abre `AGENTS.md` y sigue desde ahí.
+Verifica el entorno (Node 22+), valida `feature_list.json` y corre los tests si
+existen. Si todo está verde, abre `AGENTS.md` y sigue desde ahí.
 
-## Para usar la app (humanos)
+## Cómo usarlo con Claude Code
 
-```bash
-python3 -m src.cli add "comprar pan" --body "y leche"
-python3 -m src.cli list
-```
+Abre Claude Code en la raíz del repo: `CLAUDE.md` fuerza al modelo a actuar como
+`leader` (orquesta, no edita código) y `docs/specs.md` impone el flujo Spec
+Driven Development.
 
-## Probarlo tú mismo con Claude Code
-
-Si te descargas el repo y abres Claude Code en la raíz, ya estás dentro del
-arnés: `CLAUDE.md` fuerza al modelo a actuar como `leader` (orquesta, no
-edita código) y `docs/specs.md` impone el flujo Spec Driven Development.
-
-Receta rápida:
+Receta:
 
 1. `./init.sh` — debe terminar verde.
-2. Abre `feature_list.json` y deja al menos una feature con
-   `status: "pending"` y `"sdd": true`. La #7 `cli_recent` ya está así.
-3. Lanza Claude Code en la raíz del repo: `claude`.
-4. Pídele: **«implementa la siguiente feature pendiente»**.
+2. Describe tu proyecto en `feature_list.json` (`project`, `description`) y
+   define tu arquitectura en `docs/architecture.md`.
+3. Añade tu primera feature en `feature_list.json` con `status: "pending"` y
+   `"sdd": true` (sigue la forma documentada en `docs/specs.md`).
+4. Lanza Claude Code en la raíz: `claude`.
+5. Pídele: **«implementa la siguiente feature pendiente»**.
 
 Lo que ocurre, en dos fases:
 
 **Fase 1 — Spec.** El `leader` lanza un `spec_author` que escribe
-`specs/<feature>/{requirements.md, design.md, tasks.md}` y deja la feature
-en `spec_ready`. Luego **para y te pide aprobación**.
+`specs/<feature>/{requirements.md, design.md, tasks.md}` y deja la feature en
+`spec_ready`. Luego **para y te pide aprobación**.
 
 Tú lees los tres archivos en tu editor:
 
@@ -59,10 +60,9 @@ Tú lees los tres archivos en tu editor:
 
 Cuando estés conforme, dices al chat «aprobado» (o pides cambios).
 
-**Fase 2 — Código.** El `leader` transiciona la feature a `in_progress` y
-lanza `implementer` (sigue las tasks una a una marcándolas `[x]`) y
-después `reviewer` (verifica trazabilidad `R<n>` ↔ test y todas las tasks
-completas).
+**Fase 2 — Código.** El `leader` transiciona la feature a `in_progress` y lanza
+`implementer` (sigue las tasks una a una marcándolas `[x]`) y después `reviewer`
+(verifica trazabilidad `R<n>` ↔ test y todas las tasks completas).
 
 Dónde queda la traza de cada subagente:
 
@@ -77,16 +77,15 @@ Dónde queda la traza de cada subagente:
 | `feature_list.json`                      | leader/implementer | `pending` → `spec_ready` → `in_progress` → `done`             |
 | `progress/history.md`                    | leader             | Resumen append-only al cerrar la sesión                       |
 
-Abre `specs/` y `progress/` en tu editor mientras Claude trabaja: cada
-informe aparece en cuanto el subagente termina. Esa es la regla
-anti-teléfono-descompuesto en acción — el contenido no circula por chat,
-vive en disco y queda versionado.
+Esa es la regla anti-teléfono-descompuesto en acción: el contenido no circula
+por chat, vive en disco y queda versionado.
 
 ## Estructura
 
 ```
 .
 ├── AGENTS.md              # Mapa para agentes (divulgación progresiva)
+├── CLAUDE.md              # Fuerza el rol leader al abrir Claude Code
 ├── CHECKPOINTS.md         # Criterios de "estado final correcto"
 ├── feature_list.json      # Alcance: una feature a la vez
 ├── init.sh                # Verificación e inicialización
@@ -98,24 +97,18 @@ vive en disco y queda versionado.
 │   ├── current.md         # Sesión activa (estado vivo)
 │   └── history.md         # Bitácora append-only
 ├── docs/
-│   ├── architecture.md    # Qué significa "buen trabajo"
-│   ├── conventions.md     # Estilo, nombres, errores
+│   ├── architecture.md    # Qué significa "buen trabajo" (plantilla a rellenar)
+│   ├── conventions.md     # Estilo TS/Node, nombres, errores
 │   ├── specs.md           # Proceso SDD: EARS, 3 archivos, aprobación humana
 │   └── verification.md    # Cómo demostrar que funciona
 ├── .claude/
 │   ├── agents/            # leader, spec_author, implementer, reviewer
 │   └── settings.json      # Hooks que automatizan la verificación
-├── src/
-│   ├── storage.py         # Persistencia atómica (JSON)
-│   ├── notes.py           # Modelo de dominio
-│   └── cli.py             # Interfaz argparse
-└── tests/
-    ├── test_storage.py
-    ├── test_notes.py
-    └── test_cli.py
+├── src/                   # Tu código (lo creas tú)
+└── tests/                 # Tus tests (los creas tú)
 ```
 
-## Aprendizajes que ilustra este proyecto
+## Aprendizajes que ilustra este arnés
 
 - **Divulgación progresiva** en `AGENTS.md`: el agente no recibe todas las
   reglas de golpe, recibe un mapa para buscarlas bajo demanda.

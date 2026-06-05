@@ -1,7 +1,7 @@
-__pycache__/
-*.py[cod]
+node_modules/
+npm-debug.log*
 .notes.json
 .notes_*.json
 *.tmp
+*.log
 .DS_Store
-.venv/
