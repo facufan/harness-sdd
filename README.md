@@ -16,7 +16,7 @@ proyecto encima del framework.
 
 | Pilar                                  | Manifestación en este repo                                                       |
 |----------------------------------------|----------------------------------------------------------------------------------|
-| **1. El repositorio ES el sistema**    | `AGENTS.md`, `init.sh`, `feature_list.json`, `specs/`, `progress/`, `docs/`      |
+| **1. El repositorio ES el sistema**    | `AGENTS.md`, `init.sh`, `backlog.json`, `specs/`, `progress/`, `docs/`      |
 | **2. Orquestación multi-agente**       | `.claude/agents/leader.md`, `spec_author.md`, `implementer.md`, `reviewer.md`    |
 | **3. Spec Driven Development**         | `docs/specs.md`, EARS notation, puerta de aprobación humana en `spec_ready`      |
 | **4. Supervisión y mejora**            | `CHECKPOINTS.md`, hooks en `.claude/settings.json`, `tests/`                     |
@@ -27,7 +27,7 @@ proyecto encima del framework.
 ./init.sh
 ```
 
-Verifica el entorno (Node 22+), valida `feature_list.json` y corre los tests si
+Verifica el entorno (Node 22+), valida `backlog.json` y corre los tests si
 existen. Si todo está verde, abre `AGENTS.md` y sigue desde ahí.
 
 ## Cómo usarlo con Claude Code
@@ -39,10 +39,11 @@ Driven Development.
 Receta:
 
 1. `./init.sh` — debe terminar verde.
-2. Describe tu proyecto en `feature_list.json` (`project`, `description`) y
+2. Describe tu proyecto en `backlog.json` (`project`, `description`) y
    define tu arquitectura en `docs/architecture.md`.
-3. Añade tu primera feature en `feature_list.json` con `status: "pending"` y
-   `"sdd": true` (sigue la forma documentada en `docs/specs.md`).
+3. Añade tu primera tarea en `backlog.json` con `status: "pending"`,
+   `"sdd": true` y un `type` (`feature`, `bug` o `refactor`); sigue la forma
+   documentada en `docs/specs.md`.
 4. Lanza Claude Code en la raíz: `claude`.
 5. Pídele: **«implementa la siguiente feature pendiente»**.
 
@@ -74,7 +75,7 @@ Dónde queda la traza de cada subagente:
 | `progress/current.md`                    | leader             | Plan vivo de la sesión                                        |
 | `progress/impl_<feature>.md`             | implementer        | Archivos tocados + mapa `R<n> → test` + output de los tests   |
 | `progress/review_<feature>.md`           | reviewer           | Checklist contra `docs/`, `specs/<feature>/` y `CHECKPOINTS.md` |
-| `feature_list.json`                      | leader/implementer | `pending` → `spec_ready` → `in_progress` → `done`             |
+| `backlog.json`                      | leader/implementer | `pending` → `spec_ready` → `in_progress` → `done`             |
 | `progress/history.md`                    | leader             | Resumen append-only al cerrar la sesión                       |
 
 Esa es la regla anti-teléfono-descompuesto en acción: el contenido no circula
@@ -87,7 +88,7 @@ por chat, vive en disco y queda versionado.
 ├── AGENTS.md              # Mapa para agentes (divulgación progresiva)
 ├── CLAUDE.md              # Fuerza el rol leader al abrir Claude Code
 ├── CHECKPOINTS.md         # Criterios de "estado final correcto"
-├── feature_list.json      # Alcance: una feature a la vez
+├── backlog.json           # Backlog: una tarea a la vez (feature/bug/refactor)
 ├── init.sh                # Verificación e inicialización
 ├── specs/<feature>/       # Spec por feature (Kiro-style)
 │   ├── requirements.md    # EARS notation
@@ -113,7 +114,7 @@ por chat, vive en disco y queda versionado.
 - **Divulgación progresiva** en `AGENTS.md`: el agente no recibe todas las
   reglas de golpe, recibe un mapa para buscarlas bajo demanda.
 - **Una feature a la vez** validado por `init.sh` (rechaza más de un
-  `in_progress` en `feature_list.json`).
+  `in_progress` en `backlog.json`).
 - **Spec Driven Development** estilo Kiro: requirements (EARS) → design →
   tasks → code, con una puerta de aprobación humana antes de tocar código.
 - **Estado en disco**, no en chat: `specs/`, `progress/current.md` y

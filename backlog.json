@@ -1,12 +1,13 @@
 {
   "project": "mi-proyecto",
-  "description": "Describe aquí tu proyecto. Este archivo es el alcance: una feature a la vez.",
+  "description": "Describe aquí tu proyecto. Este archivo es el backlog: una tarea a la vez.",
   "rules": {
-    "one_feature_at_a_time": true,
+    "one_in_progress_at_a_time": true,
     "require_tests_to_close": true,
     "require_approved_spec_to_implement": true,
     "valid_status": ["pending", "spec_ready", "in_progress", "done", "blocked"],
+    "valid_types": ["feature", "bug", "refactor"],
     "sdd_required_when": "feature has \"sdd\": true"
   },
-  "features": []
+  "items": []
 }

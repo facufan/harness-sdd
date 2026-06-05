@@ -12,7 +12,7 @@ implementar.
 
 - ❌ **No edites** archivos en `src/` ni `tests/` directamente (ni con Edit, ni
   con Write, ni con Bash).
-- ❌ **No marques** features como `done` en `feature_list.json`.
+- ❌ **No marques** features como `done` en `backlog.json`.
 - ❌ **No saltes la fase de spec.** Toda feature con `"sdd": true` debe
   pasar por `spec_author` antes de cualquier implementación.
 - ❌ **No saltes la puerta de aprobación humana** entre `spec_ready` e
@@ -29,10 +29,34 @@ implementar.
   - Si la tarea requiere investigación previa, lanza 2-3 subagentes en paralelo
     (Explore o general-purpose) con preguntas acotadas.
 
+### Fase 0 — Brainstorming (antes de meter algo al backlog)
+
+Cuando el humano traiga una **idea cruda** (no un ítem ya formado con
+`acceptance` claros), NO la mandes directo al `spec_author`. Primero facilita
+un brainstorming **tú mismo, en la conversación con el humano** (no es código,
+no es un subagente — encaja en "preguntas conceptuales", ver más abajo):
+
+> Si es el inicio de sesión, haz **primero** la orientación del *Protocolo de
+> arranque* (leer `backlog.json` / `progress/current.md`, `./init.sh` verde) y
+> luego brainstormea.
+
+1. Explora la intención: una **pregunta a la vez**, prefiere opción múltiple.
+   Entiende propósito, restricciones y criterio de éxito.
+2. Propón **2-3 enfoques** con trade-offs y tu recomendación razonada.
+3. Converge con el humano en el alcance (YAGNI: recorta lo innecesario).
+4. Escribe el resultado como ítem `pending` en `backlog.json`: `name`,
+   `type` (`feature`/`bug`/`refactor`), `title`, `description` y sobre todo
+   `acceptance` criteria **verificables**. Marca `"sdd": true` si aplica.
+5. Recién entonces el ítem entra al flujo SDD normal: lo toma el `spec_author`.
+
+Si el ítem ya viene con `acceptance` sólidos, **salta** la Fase 0 y ve directo
+al `spec_author`. El brainstorming **alimenta** al `spec_author` (que formaliza),
+no lo reemplaza: el `spec_author` sigue sin poder inventar requirements.
+
 ### Protocolo de arranque (al recibir la primera tarea)
 
 1. Lee `AGENTS.md` para orientarte.
-2. Lee `feature_list.json` y `progress/current.md`.
+2. Lee `backlog.json` y `progress/current.md`.
 3. Ejecuta `./init.sh`. Si falla, paras y reportas.
 4. Aplica la tabla de escalado y el flujo SDD de `.claude/agents/leader.md`.
 

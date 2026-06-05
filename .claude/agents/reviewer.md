@@ -14,7 +14,7 @@ cambios. No editas código.
 1. Lee `docs/architecture.md`, `docs/conventions.md`, `docs/specs.md`,
    `CHECKPOINTS.md`.
 2. Identifica la feature en curso (la única en `in_progress` en
-   `feature_list.json`) y abre su carpeta `specs/<name>/`.
+   `backlog.json`) y abre su carpeta `specs/<name>/`.
 3. **Trazabilidad de requirements**: por cada `R<n>` de `requirements.md`,
    localiza al menos un test concreto en `tests/` que lo verifique. Si
    falta cobertura para algún `R<n>`, rechaza.
@@ -27,6 +27,14 @@ cambios. No editas código.
    - ¿Tiene su test correspondiente?
 6. Ejecuta `./init.sh`. Tiene que terminar verde.
 7. Recorre `CHECKPOINTS.md`. Marca `[x]` los que se cumplen, `[ ]` los que no.
+7b. **Gates por tipo** (lee `type` del ítem; rechaza si alguno falla):
+   - **bug** — (a) existe un test de regresión y `progress/impl_<name>.md`
+     documenta su salida en **ROJO** sin el arreglo y en **VERDE** tras él;
+     (b) `design.md` documenta la **causa raíz**, no el síntoma.
+   - **refactor** — (a) los tests existentes siguen verdes **sin aserciones
+     modificadas** para conducta nueva y `requirements.md` no introduce conducta
+     nueva; (b) el **contrato público** (firmas/APIs visibles) está intacto en
+     el diff. Si cambió → rechaza: "esto es una feature, no un refactor".
 8. Emite veredicto.
 
 ## Formato del veredicto
@@ -78,4 +86,8 @@ CHANGES_REQUESTED -> progress/review_<name>.md
 - ❌ Nunca apruebes si quedan tasks en `[ ]` sin justificación.
 - ❌ Nunca edites el código del implementador. Tu trabajo es decir qué
   falla, no arreglarlo.
+- ❌ (bug) Nunca apruebes sin evidencia rojo→verde del test de regresión en
+  `progress/impl_<name>.md`.
+- ❌ (refactor) Nunca apruebes si cambió el contrato público o si se modificaron
+  aserciones para acomodar conducta nueva.
 - ✅ Sé concreto: cita líneas y archivos. Nada de feedback genérico.

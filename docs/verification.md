@@ -80,4 +80,4 @@ El implementer documenta el mapa en `progress/impl_<name>.md`:
 ```
 
 Si `./init.sh` está rojo, **no** marques nada como `done`. Anota el bloqueo
-en `progress/current.md` con estado `blocked` en `feature_list.json`.
+en `progress/current.md` con estado `blocked` en `backlog.json`.

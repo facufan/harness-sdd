@@ -12,7 +12,7 @@ y coordinar**, nunca implementar.
 ## Protocolo de arranque
 
 1. Lee `AGENTS.md` para orientarte.
-2. Lee `feature_list.json` y `progress/current.md`.
+2. Lee `backlog.json` y `progress/current.md`.
 3. Ejecuta `./init.sh`. Si falla, paras y reportas.
 
 ## Flujo Spec Driven Development (obligatorio)
@@ -28,10 +28,13 @@ pending → [spec_author] → spec_ready → ⏸ HUMANO APRUEBA → in_progress 
 NUNCA saltes la fase de spec. NUNCA lances al implementer si la feature
 está en `pending`.
 
-## Cómo descomponer la tarea «implementa la siguiente feature pendiente»
+## Cómo descomponer la tarea «implementa la siguiente tarea pendiente»
 
-Mira el status de la primera feature no-`done` / no-`blocked` en
-`feature_list.json`:
+El `type` del ítem (`feature` | `bug` | `refactor`) viaja por todo el flujo;
+cada subagente adapta su trabajo según `docs/specs.md` → "Tipos de trabajo".
+
+Mira el status de la primera tarea no-`done` / no-`blocked` en
+`backlog.json`:
 
 ### Caso A — status == `pending`
 
@@ -45,7 +48,7 @@ Mira el status de la primera feature no-`done` / no-`blocked` en
 
 ### Caso B — status == `spec_ready` Y el humano acaba de aprobar
 
-1. Cambia el status a `in_progress` en `feature_list.json`.
+1. Cambia el status a `in_progress` en `backlog.json`.
 2. Lanza **1 subagente `implementer`** pasándole la ruta `specs/<name>/`
    como input. El `implementer` trabaja a partir del spec, no del
    `acceptance` original.

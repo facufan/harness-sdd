@@ -6,7 +6,7 @@
 
 ## C1 — El arnés está completo
 
-- [ ] Existen los 4 archivos base: `AGENTS.md`, `init.sh`, `feature_list.json`,
+- [ ] Existen los 4 archivos base: `AGENTS.md`, `init.sh`, `backlog.json`,
       `progress/current.md`.
 - [ ] Existen los 3 docs: `docs/architecture.md`, `docs/conventions.md`,
       `docs/verification.md`.
@@ -14,7 +14,7 @@
 
 ## C2 — El estado es coherente
 
-- [ ] Como mucho una feature en `in_progress` en `feature_list.json`.
+- [ ] Como mucho una feature en `in_progress` en `backlog.json`.
 - [ ] Toda feature `done` tiene tests asociados que pasan.
 - [ ] `progress/current.md` está vacío o describe la sesión activa
       (no contiene basura de sesiones anteriores).
@@ -48,6 +48,15 @@
       `[x]` en `tasks.md`.
 - [ ] Cada `R<n>` de `requirements.md` está cubierto por al menos un test
       concreto en `tests/`.
+
+## C7 — Disciplina por tipo
+
+- [ ] Todo ítem declara un `type` válido (`feature` / `bug` / `refactor`) o
+      ninguno (se asume `feature`).
+- [ ] Todo `bug` `done` tiene un test de regresión con evidencia **rojo→verde**
+      en `progress/impl_<name>.md` y causa raíz en `design.md`.
+- [ ] Todo `refactor` `done` mantiene los tests existentes verdes sin aserciones
+      modificadas y el contrato público intacto.
 
 ---
 

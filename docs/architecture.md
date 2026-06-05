@@ -10,7 +10,7 @@
 
 1. **Capas claras.** Define las capas de tu proyecto y respétalas. No
    introduzcas capas adicionales (servicios, repositorios, ORMs) hasta que
-   haya una razón concreta documentada en `feature_list.json`.
+   haya una razón concreta documentada en `backlog.json`.
 
    Capas de este proyecto:
    - `«capa»` — «responsabilidad».

@@ -5,7 +5,7 @@
 
 ## Estructura
 
-Cada feature nueva (`"sdd": true` en `feature_list.json`) tiene una carpeta
+Cada feature nueva (`"sdd": true` en `backlog.json`) tiene una carpeta
 dedicada en cuanto deja `pending`:
 
 ```
@@ -15,7 +15,7 @@ specs/<feature-name>/
 └── tasks.md          # PASOS concretos a implementar
 ```
 
-El `feature-name` coincide con el campo `name` de `feature_list.json`.
+El `feature-name` coincide con el campo `name` de `backlog.json`.
 
 ## Estados de una feature
 
@@ -118,6 +118,54 @@ El `implementer` documenta el mapa en `progress/impl_<name>.md`:
 - R2 → `test "recent rechaza límite <= 0"`
 - R3 → `test "recent acepta --limit custom"`
 ```
+
+## Tipos de trabajo
+
+Cada ítem de `backlog.json` declara un `type`: `feature`, `bug` o `refactor`
+(si falta, se asume `feature`). Los tres pasan por el **mismo** flujo SDD y los
+mismos 3 archivos de spec, pero el **contenido obligatorio** cambia:
+
+| Archivo | feature | bug | refactor |
+|---|---|---|---|
+| `requirements.md` | EARS de la conducta nueva | EARS de la conducta **correcta** + un requirement de reproducción (pasos → "hoy hace X, DEBE hacer Y") | Invariante: "El sistema DEBE preservar la conducta observable de `<área>`" + objetivo estructural. **Prohibido** añadir conducta nueva |
+| `design.md` | archivos/firmas + alternativa descartada | **causa raíz** (no síntoma) + por qué el arreglo la ataca + alternativa | qué se mueve/extrae/renombra + **contrato público preservado** + alternativa |
+| `tasks.md` | código + tests por `R<n>` | **T1: test de regresión que reproduce el defecto y FALLA (rojo)** → arreglo hasta verde | **T1: tests de caracterización verdes ANTES de refactorizar** → refactor → tests verdes sin tocar aserciones |
+
+### Ejemplos EARS por tipo
+
+**feature**
+```
+## R1
+CUANDO el usuario ejecuta `node src/cli.ts recent`, el sistema DEBE imprimir
+hasta 5 notas ordenadas por `created_at` descendente.
+```
+
+**bug**
+```
+## R1 (reproducción)
+CUANDO existe una nota con título vacío y el usuario ejecuta `list`, el sistema
+actualmente lanza una excepción; DEBE imprimir la nota sin fallar.
+
+## R2 (conducta correcta)
+El sistema DEBE tolerar títulos vacíos en `list` y `show`.
+```
+
+**refactor**
+```
+## R1 (invariante)
+El sistema DEBE preservar la conducta observable de los comandos `add`/`list`
+(misma salida y mismos exit codes) tras extraer la lógica de formato a un módulo.
+```
+
+### Gates por tipo (el reviewer rechaza si faltan)
+
+- **bug** — existe un test de regresión cuya salida en **ROJO** (sin el arreglo)
+  está documentada en `progress/impl_<name>.md`, y que pasa a **VERDE** tras el
+  arreglo. El `design.md` documenta la **causa raíz**, no el síntoma.
+- **refactor** — los tests existentes siguen verdes **sin modificar sus
+  aserciones**; `requirements.md` no introduce conducta nueva; el **contrato
+  público** (firmas/APIs visibles) queda intacto. Si hay que cambiarlo, es una
+  feature, no un refactor.
 
 ## Cuándo NO aplica SDD
 

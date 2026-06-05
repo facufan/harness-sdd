@@ -38,7 +38,7 @@ ok "Versión de Node compatible"
 echo ""
 echo "── 2. Verificando archivos base del arnés ──────────────"
 
-for f in AGENTS.md feature_list.json progress/current.md docs/architecture.md docs/conventions.md docs/verification.md CHECKPOINTS.md; do
+for f in AGENTS.md backlog.json progress/current.md docs/architecture.md docs/conventions.md docs/verification.md CHECKPOINTS.md; do
   if [ ! -f "$f" ]; then
     fail "Falta archivo base: $f"
     EXIT_CODE=1
@@ -48,36 +48,42 @@ for f in AGENTS.md feature_list.json progress/current.md docs/architecture.md do
 done
 
 echo ""
-echo "── 3. Validando feature_list.json y specs ─────────────"
+echo "── 3. Validando backlog.json y specs ─────────────"
 
 node <<'JS'
 const fs = require("fs");
 let data;
 try {
-  data = JSON.parse(fs.readFileSync("feature_list.json", "utf8"));
+  data = JSON.parse(fs.readFileSync("backlog.json", "utf8"));
 } catch (e) {
-  console.log("[FAIL]  feature_list.json o specs inválidos: " + e.message);
+  console.log("[FAIL]  backlog.json o specs inválidos: " + e.message);
   process.exit(1);
 }
 const valid = new Set(["pending", "spec_ready", "in_progress", "done", "blocked"]);
+const validTypes = new Set(data.rules?.valid_types || ["feature", "bug", "refactor"]);
 const requiresSpec = new Set(["spec_ready", "in_progress", "done"]);
-const features = Array.isArray(data.features) ? data.features : [];
-const inProgress = features.filter((f) => f.status === "in_progress");
+const items = Array.isArray(data.items) ? data.items : [];
+const inProgress = items.filter((it) => it.status === "in_progress");
 if (inProgress.length > 1) {
-  console.log(`[FAIL]  Hay ${inProgress.length} features en in_progress (máximo 1)`);
+  console.log(`[FAIL]  Hay ${inProgress.length} tareas en in_progress (máximo 1)`);
   process.exit(1);
 }
 const specErrors = [];
-for (const f of features) {
-  if (!valid.has(f.status)) {
-    console.log(`[FAIL]  Estado inválido en feature ${f.id}: ${f.status}`);
+for (const it of items) {
+  if (!valid.has(it.status)) {
+    console.log(`[FAIL]  Estado inválido en item ${it.id}: ${it.status}`);
     process.exit(1);
   }
-  if (f.sdd && requiresSpec.has(f.status)) {
-    const specDir = `specs/${f.name}`;
+  const type = it.type || "feature";
+  if (!validTypes.has(type)) {
+    console.log(`[FAIL]  Tipo inválido en item ${it.id}: ${type}`);
+    process.exit(1);
+  }
+  if (it.sdd && requiresSpec.has(it.status)) {
+    const specDir = `specs/${it.name}`;
     for (const fname of ["requirements.md", "design.md", "tasks.md"]) {
       if (!fs.existsSync(`${specDir}/${fname}`)) {
-        specErrors.push(`feature ${f.id} (${f.name}) en ${f.status} sin ${specDir}/${fname}`);
+        specErrors.push(`item ${it.id} (${it.name}) en ${it.status} sin ${specDir}/${fname}`);
       }
     }
   }
@@ -86,8 +92,8 @@ if (specErrors.length) {
   for (const e of specErrors) console.log(`[FAIL]  ${e}`);
   process.exit(1);
 }
-console.log(`[OK]    feature_list.json válido (${features.length} features)`);
-console.log("[OK]    Specs presentes para features sdd con estado no-pending");
+console.log(`[OK]    backlog.json válido (${items.length} items)`);
+console.log("[OK]    Specs presentes para items sdd con estado no-pending");
 JS
 
 if [ $? -ne 0 ]; then EXIT_CODE=1; fi
