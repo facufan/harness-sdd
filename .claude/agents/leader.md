@@ -68,14 +68,15 @@ abortas.
 
 Cuando lances subagentes, instrúyeles para que **escriban sus resultados
 en archivos** (no en su respuesta de texto). Tú solo recibes referencias
-del tipo: "resultado en `progress/impl_<name>.md`" o
+del tipo: "resultado en `specs/<name>/impl.md`" o
 "`spec_ready -> specs/<name>/`".
 
-> **En este repo en práctica:** tras una sesión real los informes quedan en
-> `progress/impl_<feature>.md` (implementer) y
-> `progress/review_<feature>.md` (reviewer), y el spec en
-> `specs/<feature>/`. Tú, como líder, nunca verás su contenido en chat
-> — solo una referencia. Para reproducirlo de cero, sigue la sección
+> **En este repo en práctica:** todo el expediente de una feature vive en su
+> carpeta `specs/<feature>/`: el spec (`requirements.md`, `design.md`,
+> `tasks.md`), el informe del implementer (`impl.md`) y el veredicto del
+> reviewer (`review.md`). `progress/` queda solo para el estado de sesión
+> (`current.md`, `history.md`). Tú, como líder, nunca verás su contenido en
+> chat — solo una referencia. Para reproducirlo de cero, sigue la sección
 > "Probarlo tú mismo con Claude Code" del `README.md`.
 
 ## Escalado de esfuerzo

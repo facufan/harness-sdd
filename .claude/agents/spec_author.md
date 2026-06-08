@@ -70,8 +70,9 @@ spec_ready -> specs/<name>/
 ```
 o
 ```
-blocked -> progress/spec_<name>.md
+blocked -> progress/current.md
 ```
 
-Si te bloqueas, escribe la razón en `progress/spec_<name>.md`. Nunca
+Si te bloqueas, escribe la razón en `progress/current.md` (igual que el resto
+de los agentes) y deja la feature en `blocked` en `backlog.json`. Nunca
 devuelvas el contenido del spec en chat — vive en disco.

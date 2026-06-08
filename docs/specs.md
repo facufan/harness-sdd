@@ -10,12 +10,16 @@ dedicada en cuanto deja `pending`:
 
 ```
 specs/<feature-name>/
-├── requirements.md   # QUÉ se necesita (EARS notation)
-├── design.md         # CÓMO se construirá (decisiones técnicas)
-└── tasks.md          # PASOS concretos a implementar
+├── requirements.md   # QUÉ se necesita (EARS notation)        — spec_author
+├── design.md         # CÓMO se construirá (decisiones técnicas) — spec_author
+├── tasks.md          # PASOS concretos a implementar           — spec_author
+├── impl.md           # Informe de implementación: mapa R→test + output tests — implementer
+└── review.md         # Veredicto del reviewer                  — reviewer
 ```
 
-El `feature-name` coincide con el campo `name` de `backlog.json`.
+El `feature-name` coincide con el campo `name` de `backlog.json`. Toda la traza
+de una feature vive en esta carpeta; `progress/` queda solo para el estado de
+sesión (`current.md`, `history.md`).
 
 ## Estados de una feature
 
@@ -110,7 +114,7 @@ rechaza si queda alguna `[ ]` sin justificación documentada.
 - El `reviewer` comprueba esta correspondencia explícitamente y rechaza
   si falta.
 
-El `implementer` documenta el mapa en `progress/impl_<name>.md`:
+El `implementer` documenta el mapa en `specs/<name>/impl.md`:
 
 ```markdown
 ## Trazabilidad
@@ -160,7 +164,7 @@ El sistema DEBE preservar la conducta observable de los comandos `add`/`list`
 ### Gates por tipo (el reviewer rechaza si faltan)
 
 - **bug** — existe un test de regresión cuya salida en **ROJO** (sin el arreglo)
-  está documentada en `progress/impl_<name>.md`, y que pasa a **VERDE** tras el
+  está documentada en `specs/<name>/impl.md`, y que pasa a **VERDE** tras el
   arreglo. El `design.md` documenta la **causa raíz**, no el síntoma.
 - **refactor** — los tests existentes siguen verdes **sin modificar sus
   aserciones**; `requirements.md` no introduce conducta nueva; el **contrato

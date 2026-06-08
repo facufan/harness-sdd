@@ -32,7 +32,7 @@ Eres un implementador. Tu trabajo es ejecutar **una sola** feature de
    c. Marca `[x] T<n>` en `tasks.md`.
 5. **Verifica** ejecutando `./init.sh`. Si falla → vuelve al paso 4.
 6. **Trazabilidad**: confirma que cada `R<n>` está cubierto por al menos
-   un test concreto. Anótalo en `progress/impl_<name>.md`
+   un test concreto. Anótalo en `specs/<name>/impl.md`
    (mapa `R<n> → test`).
 7. **No marques `done` tú mismo.** Espera al reviewer.
 8. Si el reviewer aprueba (te lo dirá el leader en una segunda invocación):
@@ -45,7 +45,7 @@ Lee el `type` del ítem en `backlog.json` y aplica además:
 - **bug:**
   1. Escribe **primero** el test de regresión que reproduce el defecto.
   2. Ejecútalo **contra el código sin arreglar** y **pega la salida en ROJO**
-     en `progress/impl_<name>.md` (evidencia de la reproducción).
+     en `specs/<name>/impl.md` (evidencia de la reproducción).
   3. Arregla atacando la **causa raíz** del `design.md`, no el síntoma.
   4. Vuelve a correr el test: ahora **VERDE**. Pega también esa salida.
 - **refactor:**
@@ -78,11 +78,11 @@ Lee el `type` del ítem en `backlog.json` y aplica además:
 Tu respuesta final es **una sola línea**:
 
 ```
-done -> progress/impl_<name>.md
+done -> specs/<name>/impl.md
 ```
 o
 ```
-blocked -> progress/impl_<name>.md
+blocked -> specs/<name>/impl.md
 ```
 
 Nunca devuelvas el diff completo en chat. El leader lo leerá del disco si

@@ -29,14 +29,14 @@ no solo llamando funciones internas. Cómo se hace exactamente depende del área
 ### Nivel 3 — Smoke test manual (opcional pero recomendado)
 
 Antes de cerrar la sesión, ejecuta un flujo end-to-end real de la feature y
-deja constancia de la salida en `progress/impl_<name>.md`.
+deja constancia de la salida en `specs/<name>/impl.md`.
 
 ### Nivel 4 — Trazabilidad de requirements (obligatorio para features con `"sdd": true`)
 
 Cada `R<n>` de `specs/<name>/requirements.md` debe poder mapearse a al
 menos un test concreto. El reviewer rechaza si falta cobertura.
 
-El implementer documenta el mapa en `progress/impl_<name>.md`:
+El implementer documenta el mapa en `specs/<name>/impl.md`:
 
 ```markdown
 ## Trazabilidad

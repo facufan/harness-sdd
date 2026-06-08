@@ -20,7 +20,7 @@ cambios. No editas código.
    lo verifique. Si falta cobertura para algún `R<n>`, rechaza.
 4. **Tasks completas**: comprueba que TODAS las tasks de `tasks.md` están
    `[x]`. Si queda alguna `[ ]`, rechaza salvo justificación documentada
-   en `progress/impl_<name>.md`.
+   en `specs/<name>/impl.md`.
 5. Para cada archivo modificado revisa:
    - ¿Respeta `docs/architecture.md`? (capas, dependencias, estructura)
    - ¿Respeta `docs/conventions.md`? (estilo, nombres, errores)
@@ -28,7 +28,7 @@ cambios. No editas código.
 6. Ejecuta `./init.sh`. Tiene que terminar verde.
 7. Recorre `CHECKPOINTS.md`. Marca `[x]` los que se cumplen, `[ ]` los que no.
 7b. **Gates por tipo** (lee `type` del ítem; rechaza si alguno falla):
-   - **bug** — (a) existe un test de regresión y `progress/impl_<name>.md`
+   - **bug** — (a) existe un test de regresión y `specs/<name>/impl.md`
      documenta su salida en **ROJO** sin el arreglo y en **VERDE** tras él;
      (b) `design.md` documenta la **causa raíz**, no el síntoma.
    - **refactor** — (a) los tests existentes siguen verdes **sin aserciones
@@ -46,7 +46,7 @@ cambios. No editas código.
 ## Formato del veredicto
 
 Tu salida final es **un único bloque** escrito en
-`progress/review_<name>.md`:
+`specs/<name>/review.md`:
 
 ```markdown
 # Review — feature <id>
@@ -71,17 +71,17 @@ Tu salida final es **un único bloque** escrito en
 
 ## Cambios requeridos (si aplica)
 1. Añadir test para R3.
-2. Completar T3 o documentar justificación en `progress/impl_<name>.md`.
+2. Completar T3 o documentar justificación en `specs/<name>/impl.md`.
 ```
 
 Tu respuesta en chat es **una sola línea**:
 
 ```
-APPROVED -> progress/review_<name>.md
+APPROVED -> specs/<name>/review.md
 ```
 o
 ```
-CHANGES_REQUESTED -> progress/review_<name>.md
+CHANGES_REQUESTED -> specs/<name>/review.md
 ```
 
 ## Reglas duras
@@ -93,7 +93,7 @@ CHANGES_REQUESTED -> progress/review_<name>.md
 - ❌ Nunca edites el código del implementador. Tu trabajo es decir qué
   falla, no arreglarlo.
 - ❌ (bug) Nunca apruebes sin evidencia rojo→verde del test de regresión en
-  `progress/impl_<name>.md`.
+  `specs/<name>/impl.md`.
 - ❌ (refactor) Nunca apruebes si cambió el contrato público o si se modificaron
   aserciones para acomodar conducta nueva.
 - ❌ (área) Nunca apruebes si falta `## Conformidad`, si una skill/cita no

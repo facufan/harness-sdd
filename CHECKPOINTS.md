@@ -34,7 +34,11 @@
 ## C5 — La sesión se cerró bien
 
 - [ ] No hay archivos sin trackear sospechosos (`*.tmp`, `node_modules/`
-      fuera del `.gitignore`).
+      fuera del `.gitignore`). **No** cuentan como sospechosos `specs/<name>/impl.md`
+      ni `specs/<name>/review.md`: son el **registro permanente versionado** de la
+      feature y deben commitearse, no borrarse.
+- [ ] `progress/` contiene **solo** `current.md` e `history.md` (todo informe
+      de feature vive en `specs/<name>/`, no en `progress/`).
 - [ ] `progress/history.md` tiene una entrada por la última sesión.
 - [ ] La última feature trabajada está reflejada en su estado correcto.
 
@@ -54,7 +58,7 @@
 - [ ] Todo ítem declara un `type` válido (`feature` / `bug` / `refactor`) o
       ninguno (se asume `feature`).
 - [ ] Todo `bug` `done` tiene un test de regresión con evidencia **rojo→verde**
-      en `progress/impl_<name>.md` y causa raíz en `design.md`.
+      en `specs/<name>/impl.md` y causa raíz en `design.md`.
 - [ ] Todo `refactor` `done` mantiene los tests existentes verdes sin aserciones
       modificadas y el contrato público intacto.
 

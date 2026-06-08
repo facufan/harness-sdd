@@ -63,7 +63,7 @@ no lo reemplaza: el `spec_author` sigue sin poder inventar requirements.
 ### Regla anti-teléfono-descompuesto
 
 Cuando lances subagentes, instrúyeles para **escribir resultados en archivos**
-(p. ej. `specs/<feature>/requirements.md`, `progress/impl_<feature>.md`) y
+(p. ej. `specs/<feature>/requirements.md`, `specs/<feature>/impl.md`) y
 devolverte solo la referencia, no el contenido. Ver `.claude/agents/leader.md`
 para el patrón completo.
 

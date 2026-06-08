@@ -74,11 +74,11 @@ Dónde queda la traza de cada subagente:
 | `specs/<feature>/requirements.md`        | spec_author        | EARS requirements numeradas `R1`, `R2`, ...                  |
 | `specs/<feature>/design.md`              | spec_author        | Decisiones técnicas + alternativa descartada                  |
 | `specs/<feature>/tasks.md`               | spec_author        | Checklist; el implementer la va marcando `[x]`                |
+| `specs/<feature>/impl.md`                | implementer        | Archivos tocados + mapa `R<n> → test` + output de los tests   |
+| `specs/<feature>/review.md`              | reviewer           | Checklist contra `docs/`, `specs/<feature>/` y `CHECKPOINTS.md` |
 | `progress/current.md`                    | leader             | Plan vivo de la sesión                                        |
-| `progress/impl_<feature>.md`             | implementer        | Archivos tocados + mapa `R<n> → test` + output de los tests   |
-| `progress/review_<feature>.md`           | reviewer           | Checklist contra `docs/`, `specs/<feature>/` y `CHECKPOINTS.md` |
-| `backlog.json`                      | leader/implementer | `pending` → `spec_ready` → `in_progress` → `done`             |
 | `progress/history.md`                    | leader             | Resumen append-only al cerrar la sesión                       |
+| `backlog.json`                      | leader/implementer | `pending` → `spec_ready` → `in_progress` → `done`             |
 
 Esa es la regla anti-teléfono-descompuesto en acción: el contenido no circula
 por chat, vive en disco y queda versionado.
@@ -92,10 +92,12 @@ por chat, vive en disco y queda versionado.
 ├── CHECKPOINTS.md         # Criterios de "estado final correcto"
 ├── backlog.json           # Backlog: una tarea a la vez (feature/bug/refactor)
 ├── init.sh                # Verificación e inicialización
-├── specs/<feature>/       # Spec por feature (Kiro-style)
+├── specs/<feature>/       # Expediente por feature (Kiro-style)
 │   ├── requirements.md    # EARS notation
 │   ├── design.md          # Decisiones técnicas
-│   └── tasks.md           # Checklist de implementación
+│   ├── tasks.md           # Checklist de implementación
+│   ├── impl.md            # Informe del implementer (mapa R→test + output)
+│   └── review.md          # Veredicto del reviewer
 ├── progress/
 │   ├── current.md         # Sesión activa (estado vivo)
 │   └── history.md         # Bitácora append-only

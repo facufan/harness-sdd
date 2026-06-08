@@ -22,7 +22,7 @@
 | `backlog.json`               | Backlog de tareas con `type` (`feature`/`bug`/`refactor`) y estado (`pending` / `spec_ready` / `in_progress` / `done` / `blocked`) | Siempre, al empezar |
 | `progress/current.md`        | Estado de la sesión actual                                                  | Siempre, al empezar |
 | `progress/history.md`        | Bitácora append-only de sesiones anteriores                                 | Si necesitas contexto histórico |
-| `specs/<feature>/`           | `requirements.md` + `design.md` + `tasks.md` (Kiro-style)                   | Antes de implementar cualquier feature con `"sdd": true` |
+| `specs/<feature>/`           | Expediente completo de la feature: `requirements.md` + `design.md` + `tasks.md` (spec_author, Kiro-style) + `impl.md` (informe del implementer) + `review.md` (veredicto del reviewer) | Antes de implementar cualquier feature con `"sdd": true` |
 | `docs/architecture.md`       | Qué significa "hacer un buen trabajo" en este proyecto                      | Antes de implementar |
 | `docs/conventions.md`        | Reglas de estilo, nombres, estructura                                       | Antes de escribir código |
 | `docs/specs.md`              | Proceso SDD: EARS notation, los 3 archivos, puerta de aprobación humana     | Antes de redactar o leer un spec |
@@ -73,6 +73,9 @@ Antes de terminar:
 3. Mueve el resumen de `progress/current.md` al final de `progress/history.md`.
 4. Vacía `progress/current.md` dejando solo la plantilla.
 5. No dejes archivos temporales, ni logs de debug, ni TODOs sin contexto.
+6. **El expediente de la feature (`specs/<name>/`, incluidos `impl.md` y
+   `review.md`) es el registro permanente versionado: se commitea, no se borra.**
+   `progress/` debe quedar **solo** con `current.md` e `history.md`.
 
 ## 6. Si te bloqueas
 
