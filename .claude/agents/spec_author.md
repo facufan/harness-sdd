@@ -45,6 +45,14 @@ la feature.
    Si el ítem tiene `area`, incluye una sección **`## Conformidad`** con: skills
    seguidas (por nombre), patrón imitado (`archivo:línea` de un ejemplo real) y
    desvíos justificados (o "ninguno").
+4b. Si **alguna** área del ítem tiene `qa.kind != none` en `backlog.json`
+   (interfaz observable web/http; ver `docs/qa.md`), incluye en `design.md` una
+   sección **`## Aceptación observable`**: por cada criterio del `acceptance`,
+   un escenario de **caja negra en prosa** — qué hace el usuario/cliente, qué
+   resultado **visible** se espera (texto en pantalla, código HTTP, cuerpo) y
+   qué `R<n>` valida. Es prosa, **no** código ni tests: el agente `qa` la
+   traduce a scripts Playwright/curl. No la incluyas si todas las áreas son
+   `none`.
 5. Redacta `tasks.md`: pasos discretos en orden, cada uno con `[ ]` y la
    lista de `R<n>` que cubre.
 6. Cambia el `status` de esa feature a `spec_ready` en `backlog.json`.

@@ -19,12 +19,23 @@ Toda unidad pública nueva o modificada en un área tiene al menos un test que:
 Los tests viven donde el área lo establece (`docs/<área>/conventions.md`) y se
 ejecutan con el `verify` del área.
 
-### Nivel 2 — Test de integración (obligatorio para features de interfaz)
+### Nivel 2 — Aceptación observable (obligatorio para features de interfaz)
 
-Las features que añaden una interfaz observable (CLI, endpoint HTTP, UI) se
-verifican ejercitando esa interfaz de verdad contra un entorno temporal/aislado,
-no solo llamando funciones internas. Cómo se hace exactamente depende del área
-(ver su `conventions.md`).
+Las features que añaden una interfaz observable (endpoint HTTP, UI web) se
+verifican ejercitando esa interfaz **de verdad contra un entorno temporal**, no
+solo llamando funciones internas. Esto tiene **dueño y herramienta**: el agente
+**`qa`** ([../.claude/agents/qa.md](../.claude/agents/qa.md)), que corre **entre
+el `implementer` y el `reviewer`** y es **independiente** (deriva los escenarios
+del contrato, no del código del implementer).
+
+- Se activa solo si el área declara `qa.kind != none` en `backlog.json`
+  (`web` → Playwright, `http` → curl, `both` → ambos). Ver **[qa.md](qa.md)**.
+- El `qa` escribe los scripts en `qa/web/` y/o `qa/api/`, ejercita la app y deja
+  el veredicto en `specs/<name>/acceptance.md` con evidencia.
+- El `reviewer` **rechaza** si falta `acceptance.md` o tiene algún `FAIL`.
+
+Para áreas sin interfaz observable (CLI, librería), declara `qa.kind: "none"`:
+este nivel se omite y basta con el Nivel 1.
 
 ### Nivel 3 — Smoke test manual (opcional pero recomendado)
 

@@ -1,0 +1,2 @@
+# Scripts curl/http de aceptación, uno por feature: <feature-name>.sh
+# Los escribe el agente qa derivándolos del contrato (acceptance + R<n>).

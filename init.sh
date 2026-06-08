@@ -75,6 +75,10 @@ if (areas.length === 0) {
   process.exit(1);
 }
 const areaNames = new Set(areas.map((a) => a.name));
+// Capacidad de aceptación por área (opt-in). Mapea name -> kind para validar
+// luego que los items 'done' con área qa-activa tengan su acceptance.md.
+const validQaKinds = new Set(["web", "http", "both", "none"]);
+const areaQaKind = {};
 for (const a of areas) {
   if (!a.name || !a.path || !a.docs) {
     specErrors.push(`área inválida (requiere name, path, docs): ${JSON.stringify(a)}`);
@@ -92,6 +96,18 @@ for (const a of areas) {
   if (!a.verify && !a.test) {
     specErrors.push(`área ${a.name} sin comando 'verify'`);
   }
+  // Capa de aceptación opcional (ver docs/qa.md). Omitir qa ⇒ kind 'none'.
+  const kind = a.qa && a.qa.kind ? a.qa.kind : "none";
+  if (!validQaKinds.has(kind)) {
+    specErrors.push(`área ${a.name} con qa.kind inválido: ${kind} (web|http|both|none)`);
+  }
+  if (["web", "http", "both"].includes(kind)) {
+    // base_url siempre: es a dónde apunta el qa. start es OPCIONAL: si falta,
+    // la app es de ciclo de vida externo (la levantás vos / docker-compose) y
+    // el qa solo la usa, sin arrancarla ni bajarla. Ver docs/qa.md.
+    if (!a.qa.base_url) specErrors.push(`área ${a.name} con qa.kind=${kind} sin qa.base_url`);
+  }
+  areaQaKind[a.name] = kind;
 }
 for (const it of items) {
   if (!valid.has(it.status)) {
@@ -117,6 +133,15 @@ for (const it of items) {
         specErrors.push(`item ${it.id} (${it.name}) en ${it.status} sin ${specDir}/${fname}`);
       }
     }
+    // Gate de aceptación: un item 'done' que toca un área con qa activo
+    // (web/http/both) debe tener su acceptance.md (lo produce el agente qa).
+    // Solo se exige en 'done': la aceptación corre después del implementer.
+    if (it.status === "done") {
+      const touchesQa = itemAreas.some((an) => ["web", "http", "both"].includes(areaQaKind[an]));
+      if (touchesQa && !fs.existsSync(`${specDir}/acceptance.md`)) {
+        specErrors.push(`item ${it.id} (${it.name}) done con área qa-activa sin ${specDir}/acceptance.md`);
+      }
+    }
   }
 }
 if (specErrors.length) {
@@ -124,8 +149,9 @@ if (specErrors.length) {
   process.exit(1);
 }
 console.log(`[OK]    backlog.json válido (${items.length} items, ${areas.length} áreas)`);
-console.log("[OK]    Cada área tiene conventions + skills + verify");
+console.log("[OK]    Cada área tiene conventions + skills + verify (+ qa si aplica)");
 console.log("[OK]    Specs presentes para items sdd con estado no-pending");
+console.log("[OK]    acceptance.md presente para items done con área qa-activa");
 JS
 
 if [ $? -ne 0 ]; then EXIT_CODE=1; fi

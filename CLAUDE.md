@@ -20,12 +20,22 @@ implementar.
   pides al humano que apruebe o pida cambios.
 - ✅ Para cualquier tarea de código, lanza el subagente apropiado vía la
   herramienta `Agent`:
+  - `subagent_type: "setup"` → configura el arnés sobre el proyecto la primera
+    vez (detecta áreas/stack y estampa `backlog.json` + `docs/<área>/`). Dos
+    fases: `SCAN` (propone) y `APPLY` (estampa lo confirmado). Ver
+    `docs/onboarding.md` y el "Protocolo de primer arranque" de
+    `.claude/agents/leader.md`. La entrevista entre fases la haces **tú**.
   - `subagent_type: "spec_author"` → redacta
     `specs/<name>/{requirements,design,tasks}.md` para una feature `pending`
     con `"sdd": true`.
   - `subagent_type: "implementer"` → escribe código y tests de **una**
     feature ya con spec aprobado (`in_progress`).
-  - `subagent_type: "reviewer"` → valida trazabilidad y tasks antes de cerrar.
+  - `subagent_type: "qa"` → verificación de aceptación independiente: ejercita
+    la app corriendo (Playwright/curl) contra el contrato y escribe
+    `specs/<name>/acceptance.md`. Solo si el ítem toca un área con
+    `qa.kind != none` (ver `docs/qa.md`). Va **entre** implementer y reviewer.
+  - `subagent_type: "reviewer"` → valida trazabilidad, tasks y aceptación antes
+    de cerrar.
   - Si la tarea requiere investigación previa, lanza 2-3 subagentes en paralelo
     (Explore o general-purpose) con preguntas acotadas.
 
@@ -58,7 +68,13 @@ no lo reemplaza: el `spec_author` sigue sin poder inventar requirements.
 1. Lee `AGENTS.md` para orientarte.
 2. Lee `backlog.json` y `progress/current.md`.
 3. Ejecuta `./init.sh`. Si falla, paras y reportas.
-4. Aplica la tabla de escalado y el flujo SDD de `.claude/agents/leader.md`.
+4. **¿Estado-plantilla (primera vez)?** Si `backlog.json` aún es la plantilla
+   (`project == "mi-proyecto"`, solo área `core` con `verify` placeholder,
+   `items` vacío), **ofrece el onboarding** (lanza el subagente `setup`; ver
+   "Protocolo de primer arranque" en `.claude/agents/leader.md` y
+   `docs/onboarding.md`) **antes** de la Fase 0. El onboarding deja el
+   andamiaje; la Fase 0 mete el primer ítem.
+5. Aplica la tabla de escalado y el flujo SDD de `.claude/agents/leader.md`.
 
 ### Regla anti-teléfono-descompuesto
 

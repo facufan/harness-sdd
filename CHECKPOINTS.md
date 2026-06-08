@@ -71,8 +71,20 @@
       `design.md` con skills + patrón (`archivo:línea`) reales.
 - [ ] El `verify` del área de la tarea pasa (`rules.areas[].verify`).
 
+## C9 — Aceptación observable (features de interfaz)
+
+- [ ] Toda área con interfaz observable declara `qa.kind` (`web`/`http`/`both`)
+      con `base_url` y `start` en `backlog.json` (ver `docs/qa.md`).
+- [ ] Todo ítem `done` que toca un área con `qa.kind != none` tiene
+      `specs/<name>/acceptance.md` con veredicto `ACCEPTANCE_PASS`.
+- [ ] Cada criterio de aceptación tiene evidencia ejecutable (screenshot o
+      transcript HTTP) en `qa/results/<name>/`.
+- [ ] Los escenarios los derivó el agente `qa` del **contrato**, no del código
+      del implementer (independencia).
+
 ---
 
 **Cómo usar este archivo:** un agente revisor (`.claude/agents/reviewer.md`)
 recorre cada checkbox, marca `[x]` o `[ ]`, y rechaza el cierre de sesión
-si quedan boxes vacíos en C1-C6.
+si quedan boxes vacíos en C1-C6 (y en C9 cuando la feature toca un área con
+interfaz observable).

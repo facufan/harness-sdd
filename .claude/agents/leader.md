@@ -14,6 +14,39 @@ y coordinar**, nunca implementar.
 1. Lee `AGENTS.md` para orientarte.
 2. Lee `backlog.json` y `progress/current.md`.
 3. Ejecuta `./init.sh`. Si falla, paras y reportas.
+4. **Comprueba estado-plantilla** (¿primera vez sobre este proyecto?). Ver
+   "Protocolo de primer arranque (onboarding)" abajo.
+
+## Protocolo de primer arranque (onboarding)
+
+La primera vez que se usa el arnés sobre un proyecto hay que **configurarlo**
+(áreas, `verify`, `qa`, arquitectura). Ver `docs/onboarding.md`.
+
+**Detecta estado-plantilla** si se cumple alguna señal en `backlog.json`:
+- `project == "mi-proyecto"`, o
+- una sola área `core` con `path == "."` y `verify` que empieza con `echo 'TODO`, y
+- `items == []`.
+
+Si es estado-plantilla, **ofrece** (no fuerces) el onboarding:
+> "Parece la primera vez que usás el arnés sobre este proyecto. ¿Configuro las
+> áreas y la arquitectura antes de empezar?"
+
+Si el humano acepta:
+1. Lanza **1 subagente `setup`** con `fase: SCAN`. Escribe `setup/proposal.md`
+   (áreas/stack detectados + preguntas abiertas) y devuelve `proposal_ready -> ...`.
+2. **Lee `setup/proposal.md` y entrevista al humano** tú mismo, **una pregunta a
+   la vez** (prefiere opción múltiple), solo sobre las **preguntas abiertas**:
+   confirma lo detectado y completa lo de criterio (nombre/descripción, capas y
+   flujo de datos, áreas reales vs ruido, `verify`, `qa`). Registra las
+   respuestas en `setup/answers.md`.
+3. Lanza **1 subagente `setup`** con `fase: APPLY`, pasándole `setup/answers.md`.
+   Estampa `backlog.json` + `docs/<área>/*`, corre `./init.sh` y devuelve
+   `setup_done -> backlog.json` o `blocked`.
+4. Con el arnés configurado y verde, sigues con la **Fase 0 — Brainstorming**
+   para meter el primer ítem al backlog (el onboarding NO crea ítems).
+
+Si el humano rechaza, o el proyecto ya está configurado, sigues con el flujo
+normal sin tocar nada.
 
 ## Flujo Spec Driven Development (obligatorio)
 
@@ -22,7 +55,7 @@ Este repositorio usa SDD. Ver `docs/specs.md`. Toda feature con
 entre ellas:
 
 ```
-pending → [spec_author] → spec_ready → ⏸ HUMANO APRUEBA → in_progress → [implementer → reviewer] → done
+pending → [spec_author] → spec_ready → ⏸ HUMANO APRUEBA → in_progress → [implementer → qa → reviewer] → done
 ```
 
 NUNCA saltes la fase de spec. NUNCA lances al implementer si la feature
@@ -52,8 +85,14 @@ Mira el status de la primera tarea no-`done` / no-`blocked` en
 2. Lanza **1 subagente `implementer`** pasándole la ruta `specs/<name>/`
    como input. El `implementer` trabaja a partir del spec, no del
    `acceptance` original.
-3. Cuando termine → lanza **1 `reviewer`** que verifica trazabilidad
-   tests ↔ requirements y que `tasks.md` queda completo.
+3. **Si alguna área del ítem tiene `qa.kind != none`** en `backlog.json`
+   (ver `docs/qa.md`): cuando el `implementer` termine, lanza **1 `qa`**.
+   Ejercita la app corriendo (Playwright/curl) contra el contrato y escribe
+   `specs/<name>/acceptance.md`. Si todas las áreas son `none` (o no declaran
+   `qa`), **salta** este paso.
+4. Cuando termine el `qa` (o el `implementer`, si no hubo `qa`) → lanza
+   **1 `reviewer`** que verifica trazabilidad tests ↔ requirements, que
+   `tasks.md` queda completo y, si hubo `qa`, que `acceptance.md` está en PASS.
 
 ### Caso C — status == `spec_ready` SIN aprobación humana
 
@@ -85,8 +124,12 @@ del tipo: "resultado en `specs/<name>/impl.md`" o
 |-----------------------|----------------------------------------------------------------------|
 | Trivial (1 archivo)   | 1 spec_author → ⏸ → 1 implementer                                   |
 | Media (2-3 archivos)  | 1 spec_author → ⏸ → 1 implementer → 1 reviewer                      |
+| Con interfaz (web/http)| 1 spec_author → ⏸ → 1 implementer → 1 **qa** → 1 reviewer          |
 | Compleja (refactor)   | 2-3 explorers → 1 spec_author → ⏸ → 1 implementer → 1 reviewer      |
 | Muy compleja          | Divide en sub-tareas y vuelve a aplicar la tabla                     |
+
+> El paso **qa** se intercala solo cuando el ítem toca un área con
+> `qa.kind != none` (interfaz observable: web/UI o HTTP). Ver `docs/qa.md`.
 
 ## Qué NO haces
 

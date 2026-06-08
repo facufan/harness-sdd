@@ -10,6 +10,10 @@
 
 1. Ejecuta `./init.sh` y verifica que termina sin errores. Si falla, **para**
    y resuelve el entorno antes de tocar código.
+1b. **¿Primera vez sobre este proyecto?** Si `backlog.json` aún es la plantilla
+   (`project == "mi-proyecto"`, área `core` con `verify` placeholder, `items`
+   vacío), el arnés no está configurado: ver `docs/onboarding.md` (agente
+   `setup`) antes de empezar a trabajar features.
 2. Lee `progress/current.md` para entender en qué estado quedó la última sesión.
 3. Lee `backlog.json`. Toda feature nueva (`"sdd": true`) pasa por
    **Spec Driven Development** — ver `docs/specs.md` y §4 de este archivo.
@@ -28,8 +32,11 @@
 | `docs/specs.md`              | Proceso SDD: EARS notation, los 3 archivos, puerta de aprobación humana     | Antes de redactar o leer un spec |
 | `docs/<área>/`               | Conocimiento por área del monorepo: `conventions.md` + `skills/` (índice `SKILLS.md`) | Antes de implementar en esa área |
 | `docs/verification.md`       | Cómo verificar que tu trabajo funciona (incluye trazabilidad requirements)  | Antes de declarar una tarea como `done` |
+| `docs/qa.md`                 | Capa de aceptación: agente `qa`, `qa.kind` por área, Playwright/curl         | Si el ítem toca un área con interfaz observable (web/http) |
+| `qa/`                        | Hogar de scripts de aceptación: `web/` (Playwright), `api/` (curl)           | Lo gestiona el agente `qa` |
+| `docs/onboarding.md`         | Configurar el arnés sobre un proyecto la primera vez (agente `setup`)         | La primera vez que usás el arnés sobre un proyecto |
 | `CHECKPOINTS.md`             | Criterios objetivos de "estado final correcto"                              | Para auto-evaluarte |
-| `.claude/agents/`            | Definiciones de subagentes (`leader`, `spec_author`, `implementer`, `reviewer`) | Si orquestas trabajo |
+| `.claude/agents/`            | Definiciones de subagentes (`leader`, `setup`, `spec_author`, `implementer`, `qa`, `reviewer`) | Si orquestas trabajo |
 | `<path>/` por área           | Código de cada área (ver `rules.areas[].path` en `backlog.json`)            | Para implementar |
 | Tests del área               | En la ubicación que define cada área (`docs/<área>/conventions.md`)         | Para verificar |
 
@@ -49,7 +56,7 @@
 ## 4. Flujo de trabajo (SDD)
 
 ```
-pending → [spec_author] → spec_ready → ⏸ HUMANO → in_progress → [implementer → reviewer] → done
+pending → [spec_author] → spec_ready → ⏸ HUMANO → in_progress → [implementer → qa → reviewer] → done
 ```
 
 1. El leader detecta la primera feature `pending` con `"sdd": true`.
@@ -59,9 +66,12 @@ pending → [spec_author] → spec_ready → ⏸ HUMANO → in_progress → [imp
 3. **Pausa.** El humano lee el spec en `specs/<name>/` y aprueba (o pide cambios).
 4. Una vez aprobado, el leader cambia el status a `in_progress` y lanza `implementer`.
 5. El implementer ejecuta `tasks.md` una a una, marcándolas `[x]`.
-6. El reviewer verifica trazabilidad `R<n>` ↔ test y tasks completas;
-   aprueba o rechaza.
-7. Si aprueba, el implementer marca `done` y mueve el resumen a
+6. Si el ítem toca un área con interfaz observable (`qa.kind != none`), el leader
+   lanza `qa`: ejercita la app corriendo (Playwright/curl) contra el contrato y
+   escribe `specs/<name>/acceptance.md`. Ver `docs/qa.md`. (Se salta si no aplica.)
+7. El reviewer verifica trazabilidad `R<n>` ↔ test, tasks completas y —si hubo
+   `qa`— que `acceptance.md` está en PASS; aprueba o rechaza.
+8. Si aprueba, el implementer marca `done` y mueve el resumen a
    `progress/history.md`.
 
 ## 5. Cierre de sesión (lifecycle)

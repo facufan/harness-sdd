@@ -41,6 +41,12 @@ cambios. No editas código.
    - cada `archivo:línea` citado apunta a código real;
    - el código nuevo respeta `docs/<área>/conventions.md` (desvíos solo con
      justificación escrita en `## Conformidad`).
+7d. **Gate de aceptación** (si alguna área del ítem tiene `qa.kind != none` en
+   `backlog.json`; ver `docs/qa.md`; rechaza si falla):
+   - existe `specs/<name>/acceptance.md`;
+   - su veredicto es `ACCEPTANCE_PASS` (todos los criterios en `PASS`);
+   - cada criterio tiene evidencia citada (screenshot/transcript en `qa/results/`).
+   Si falta el archivo o hay algún `FAIL` → `CHANGES_REQUESTED`.
 8. Emite veredicto.
 
 ## Formato del veredicto
@@ -63,11 +69,15 @@ Tu salida final es **un único bloque** escrito en
 - T2: [x]
 - T3: [ ]  ← Sigue en `[ ]` en specs/<name>/tasks.md sin justificación
 
+## Aceptación (si el área tiene qa.kind != none)
+- acceptance.md: [x] ACCEPTANCE_PASS (o [ ] falta / FAIL)
+
 ## Checkpoints
 - C1: [x]
 - C2: [x]
 - ...
 - C6: [x]
+- C9: [x]  ← aceptación observable (si aplica)
 
 ## Cambios requeridos (si aplica)
 1. Añadir test para R3.
@@ -98,4 +108,7 @@ CHANGES_REQUESTED -> specs/<name>/review.md
   aserciones para acomodar conducta nueva.
 - ❌ (área) Nunca apruebes si falta `## Conformidad`, si una skill/cita no
   existe, o si hay desvío de convención del área sin justificar.
+- ❌ (aceptación) Nunca apruebes un ítem con área `qa.kind != none` si falta
+  `specs/<name>/acceptance.md`, si su veredicto no es `ACCEPTANCE_PASS`, o si
+  algún criterio queda sin evidencia.
 - ✅ Sé concreto: cita líneas y archivos. Nada de feedback genérico.

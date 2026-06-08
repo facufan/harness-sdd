@@ -16,7 +16,11 @@
   "permissions": {
     "allow": [
       "Bash(./init.sh)",
-      "Bash(node -e*)"
+      "Bash(node -e*)",
+      "Bash(npm install*)",
+      "Bash(npm run qa:*)",
+      "Bash(npx playwright*)",
+      "Bash(curl*)"
     ]
   }
 }

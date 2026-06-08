@@ -1,0 +1,12 @@
+{
+  "name": "harness-sdd",
+  "private": true,
+  "description": "Arnés SDD agnóstico de lenguaje. Node y Playwright son herramientas internas del arnés (validación de backlog/specs y verificación de aceptación), NO el runtime de tu proyecto.",
+  "scripts": {
+    "qa:install": "playwright install chromium",
+    "qa:web": "playwright test --config qa/playwright.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

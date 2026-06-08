@@ -1,5 +1,14 @@
 node_modules/
 npm-debug.log*
+
+# Evidencia y reportes generados por la capa de aceptación (qa/)
+qa/results/
+test-results/
+playwright-report/
+.playwright/
+
+# Andamiaje efímero del onboarding (el resultado real va a backlog.json y docs/)
+setup/
 .notes.json
 .notes_*.json
 *.tmp

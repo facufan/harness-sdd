@@ -1,0 +1,2 @@
+# Playwright specs de aceptación, uno por feature: <feature-name>.spec.ts
+# Los escribe el agente qa derivándolos del contrato (acceptance + R<n>).

@@ -13,7 +13,11 @@
         "path": ".",
         "docs": "docs/core",
         "skills": "docs/core/skills/SKILLS.md",
-        "verify": "echo 'TODO: reemplaza por el comando de verificación real de esta área'"
+        "verify": "echo 'TODO: reemplaza por el comando de verificación real de esta área'",
+        "qa": {
+          "_comment": "Capa de aceptación (opt-in). kind: web|http|both|none. 'none' = sin gate de aceptación (default si se omite). Para web/both: base_url + start obligatorios. Ver docs/qa.md.",
+          "kind": "none"
+        }
       }
     ],
     "sdd_required_when": "feature has \"sdd\": true"
