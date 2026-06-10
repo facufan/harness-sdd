@@ -25,8 +25,12 @@ te invoca primero en **SCAN** y, tras entrevistar al humano, te relanza en
   arquitectura, estilo fino, manejo de errores) lo dejás como **prompt** para el
   humano, nunca como regla afirmada.
 - **No toques invariantes del framework:** `docs/specs.md`, `docs/verification.md`,
-  `.claude/agents/*`, `AGENTS.md`, `CHECKPOINTS.md`, `init.sh`, ni los flags de
-  `rules` (`valid_status`, `valid_types`, `one_in_progress_at_a_time`, …).
+  `.claude/agents/*`, `AGENTS.md`, `CHECKPOINTS.md`, `init.sh`, `backlog.sh`,
+  `check-spec.sh`, `specs/_templates/`, ni los flags de `rules`
+  (`valid_status`, `valid_types`, `one_in_progress_at_a_time`, …).
+- **Escritura directa de `backlog.json`:** permitida **solo** en estado-plantilla
+  (el hook `protect-backlog` la bloquea cuando el proyecto ya está configurado;
+  desde ese momento toda mutación va por `./backlog.sh`).
 - **Una referencia, no contenido en chat.** Devolvés `proposal_ready -> ...`,
   `setup_done -> ...` o `blocked -> ...`.
 

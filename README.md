@@ -21,6 +21,7 @@ herramienta interna del arnés para validar `backlog.json` y los specs.)
 | **2. Orquestación multi-agente**       | `.claude/agents/leader.md`, `spec_author.md`, `implementer.md`, `reviewer.md`    |
 | **3. Spec Driven Development**         | `docs/specs.md`, EARS notation, puerta de aprobación humana en `spec_ready`      |
 | **4. Supervisión y mejora**            | `CHECKPOINTS.md`, hooks en `.claude/settings.json`, `verify` por área            |
+| **5. Enforcement mecánico**            | `backlog.sh` (transiciones validadas), `check-spec.sh` (gates por regex), hook que bloquea la edición directa de `backlog.json`, plantillas en `specs/_templates/` |
 
 ## Para empezar
 
@@ -43,9 +44,9 @@ Receta:
 2. Describe tu proyecto en `backlog.json` (`project`, `description`), define
    tus **áreas** en `rules.areas` (cada una con `path`, `docs`, `skills`,
    `verify`) y tu arquitectura en `docs/architecture.md`.
-3. Añade tu primera tarea en `backlog.json` con `status: "pending"`,
-   `"sdd": true` y un `type` (`feature`, `bug` o `refactor`); sigue la forma
-   documentada en `docs/specs.md`.
+3. Añade tu primera tarea con `./backlog.sh add '<json>'` (`"sdd": true`, o
+   `"sdd": "lite"` para cambios triviales de un solo archivo de spec) y un
+   `type` (`feature`, `bug` o `refactor`); ver `docs/specs.md`.
 4. Lanza Claude Code en la raíz: `claude`.
 5. Pídele: **«implementa la siguiente feature pendiente»**.
 
@@ -91,13 +92,17 @@ por chat, vive en disco y queda versionado.
 ├── CLAUDE.md              # Fuerza el rol leader al abrir Claude Code
 ├── CHECKPOINTS.md         # Criterios de "estado final correcto"
 ├── backlog.json           # Backlog: una tarea a la vez (feature/bug/refactor)
+├── backlog.sh             # Única puerta de escritura del backlog (transiciones validadas)
+├── check-spec.sh          # Gates mecánicos de specs (regex + exit code, sin LLM)
 ├── init.sh                # Verificación e inicialización
-├── specs/<feature>/       # Expediente por feature (Kiro-style)
-│   ├── requirements.md    # EARS notation
-│   ├── design.md          # Decisiones técnicas
-│   ├── tasks.md           # Checklist de implementación
-│   ├── impl.md            # Informe del implementer (mapa R→test + output)
-│   └── review.md          # Veredicto del reviewer
+├── specs/
+│   ├── _templates/        # Plantillas: los agentes copian y rellenan, no inventan
+│   └── <feature>/         # Expediente por feature (Kiro-style)
+│       ├── requirements.md  # EARS notation (o spec.md único si "sdd": "lite")
+│       ├── design.md        # Decisiones técnicas
+│       ├── tasks.md         # Checklist de implementación
+│       ├── impl.md          # Informe del implementer (mapa R→test + output)
+│       └── review.md        # Veredicto del reviewer
 ├── progress/
 │   ├── current.md         # Sesión activa (estado vivo)
 │   └── history.md         # Bitácora append-only
@@ -108,7 +113,8 @@ por chat, vive en disco y queda versionado.
 │   ├── verification.md    # Cómo demostrar que funciona
 │   └── <área>/            # Por área: conventions.md + skills/SKILLS.md
 ├── .claude/
-│   ├── agents/            # leader, spec_author, implementer, reviewer
+│   ├── agents/            # leader, setup, spec_author, implementer, qa, reviewer
+│   ├── hooks/             # protect-backlog.sh (backlog.json solo via backlog.sh)
 │   └── settings.json      # Hooks que automatizan la verificación
 ├── <path-de-área>/        # Tu código por área (lo creas tú; ver rules.areas[].path)
 └── ...                    # Tus tests donde cada área los ubique
@@ -133,3 +139,10 @@ por chat, vive en disco y queda versionado.
   reviewer no edita código.
 - **Anti teléfono-descompuesto**: los subagentes escriben sus resultados
   en archivos y solo devuelven una referencia ligera.
+- **Enforcement mecánico, no prosa**: lo que se puede validar con un regex o
+  una máquina de estados vive en `backlog.sh`/`check-spec.sh` (exit codes) y
+  en hooks — robusto incluso con modelos débiles, que siguen plantillas y
+  scripts mejor que instrucciones largas.
+- **Paquete de contexto**: el leader pasa a cada subagente el JSON de
+  `./backlog.sh next` (ítem + áreas + verify + qa); el subagente no re-lee
+  docs globales que no le tocan → menos tokens y menos errores de selección.

@@ -67,8 +67,12 @@ El implementer documenta el mapa en `specs/<name>/impl.md`:
 ## Verificación final antes de cerrar
 
 ```bash
-./init.sh           # debe terminar con [OK] Entorno listo
+./check-spec.sh <name> --stage impl   # gates mecánicos del spec (tasks, trazabilidad)
+./init.sh                             # debe terminar con [OK] Entorno listo
 ```
+
+(`./backlog.sh set-status <name> done` corre ambos automáticamente y rechaza
+el cierre si alguno está rojo.)
 
 `./init.sh` corre el `verify` de cada área registrada. Si está rojo, **no**
 marques nada como `done`: anota el bloqueo en `progress/current.md` y deja el

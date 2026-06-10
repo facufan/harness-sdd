@@ -46,12 +46,14 @@
 
 - [ ] Toda feature con `"sdd": true` en estado `spec_ready`, `in_progress`
       o `done` tiene su carpeta `specs/<name>/` con los 3 archivos:
-      `requirements.md`, `design.md`, `tasks.md`.
-- [ ] `requirements.md` usa EARS estricto (ver `docs/specs.md`).
-- [ ] Toda feature `done` con `"sdd": true` tiene todas sus tasks marcadas
-      `[x]` en `tasks.md`.
-- [ ] Cada `R<n>` de `requirements.md` está cubierto por al menos un test
-      concreto en `tests/`.
+      `requirements.md`, `design.md`, `tasks.md` (con `"sdd": "lite"`, basta
+      `spec.md`).
+- [ ] Los requirements usan EARS estricto (ver `docs/specs.md`).
+- [ ] Toda feature `done` con sdd tiene todas sus tasks marcadas `[x]`.
+- [ ] Cada `R<n>` está cubierto por al menos un test concreto en la ubicación
+      de tests del área.
+- [ ] `./check-spec.sh <name> --stage impl` termina verde para toda feature
+      sdd en `done`.
 
 ## C7 — Disciplina por tipo
 

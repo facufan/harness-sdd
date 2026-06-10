@@ -21,6 +21,45 @@ El `feature-name` coincide con el campo `name` de `backlog.json`. Toda la traza
 de una feature vive en esta carpeta; `progress/` queda solo para el estado de
 sesión (`current.md`, `history.md`).
 
+**Plantillas:** todos estos archivos tienen su esqueleto en `specs/_templates/`.
+Los agentes **copian la plantilla y rellenan los «...»** — no inventan
+estructura. Eso hace la salida validable por `./check-spec.sh` y fiable incluso
+con modelos débiles.
+
+## SDD lite (`"sdd": "lite"`)
+
+Para cambios **triviales** (1-2 archivos) el ciclo completo de 3 archivos es
+overhead. Un ítem con `"sdd": "lite"` usa **un solo archivo**:
+
+```
+specs/<feature-name>/spec.md   # R<n> + diseño mínimo + tasks (plantilla: specs/_templates/spec.md)
+```
+
+Mismo flujo y **misma puerta de aprobación humana**; mismos gates mecánicos
+sobre `R<n>` y tasks. Regla de escape: si al redactarlo aparecen >3
+requirements o >5 tasks, no es lite — se convierte a `"sdd": true`.
+
+## Gates mecánicos (`./check-spec.sh`)
+
+Lo validable por patrón **no se valida con criterio**: lo corre
+`./check-spec.sh <name>` con exit code.
+
+- `--stage spec` (lo corre `backlog.sh` al pasar a `spec_ready`): archivos del
+  spec presentes, cada `## R<n>` con `DEBE`/`NO DEBE` y sin verbos blandos,
+  tasks con `Cubre: R<n>`, toda `R<n>` cubierta por una task, `## Conformidad`
+  presente (si hay área) con citas `archivo:línea` reales, `## Aceptación
+  observable` (si hay qa).
+- `--stage impl` (lo corre `backlog.sh` al pasar a `done`): todas las tasks
+  `[x]`, `impl.md` con `## Trazabilidad` cubriendo cada `R<n>`, evidencia
+  rojo→verde para bugs, `acceptance.md` en `ACCEPTANCE_PASS` si hay qa.
+
+El `reviewer` no repite estos checks: aporta solo el **juicio** (causa raíz
+real, calidad de tests, contrato público, convenciones).
+
+Las **transiciones de estado** también son mecánicas: `backlog.json` se muta
+solo via `./backlog.sh set-status` (un hook bloquea la edición directa), que
+rechaza transiciones ilegales y corre los gates de arriba automáticamente.
+
 ## Estados de una feature
 
 | Estado         | Significado                                                    |
@@ -41,8 +80,9 @@ Solo entonces el `leader` transiciona `spec_ready → in_progress` y lanza
 el `implementer`.
 
 ```
-pending → [spec_author] → spec_ready → ⏸ HUMANO → in_progress → [implementer → reviewer] → done
+pending → [spec_author] → spec_ready → ⏸ HUMANO → in_progress → [implementer → qa* → reviewer] → done
 ```
+(*el paso `qa` solo si alguna área del ítem tiene `qa.kind != none`; ver `qa.md`)
 
 ## requirements.md — EARS estricto
 
@@ -242,4 +282,4 @@ código nuevo se desvía de las convenciones del área sin justificación.
 ## Cuándo NO aplica SDD
 
 Las features con `"sdd": false` o sin el campo `sdd` NO tienen spec. SDD solo
-se aplica a las features que lo declaran explícitamente.
+se aplica a las features que lo declaran explícitamente (`true` o `"lite"`).

@@ -36,7 +36,7 @@ ok "node (herramienta del arnés) -> $(node --version)"
 echo ""
 echo "── 2. Verificando archivos base del arnés ──────────────"
 
-for f in AGENTS.md backlog.json progress/current.md docs/architecture.md docs/conventions.md docs/verification.md CHECKPOINTS.md; do
+for f in AGENTS.md backlog.json backlog.sh check-spec.sh progress/current.md docs/architecture.md docs/conventions.md docs/verification.md CHECKPOINTS.md; do
   if [ ! -f "$f" ]; then
     fail "Falta archivo base: $f"
     EXIT_CODE=1
@@ -128,7 +128,9 @@ for (const it of items) {
   }
   if (it.sdd && requiresSpec.has(it.status)) {
     const specDir = `specs/${it.name}`;
-    for (const fname of ["requirements.md", "design.md", "tasks.md"]) {
+    // "sdd": "lite" → un solo spec.md; "sdd": true → los 3 archivos Kiro-style.
+    const required = it.sdd === "lite" ? ["spec.md"] : ["requirements.md", "design.md", "tasks.md"];
+    for (const fname of required) {
       if (!fs.existsSync(`${specDir}/${fname}`)) {
         specErrors.push(`item ${it.id} (${it.name}) en ${it.status} sin ${specDir}/${fname}`);
       }

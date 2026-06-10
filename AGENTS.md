@@ -1,94 +1,75 @@
 # AGENTS.md — Mapa de navegación para agentes de IA
 
-> Este archivo es el **punto de entrada** para cualquier agente que trabaje en este
-> repositorio. NO es una biblia de reglas: es un **mapa**. Lee solo lo que
-> necesites cuando lo necesites (divulgación progresiva).
-
----
+> Punto de entrada para cualquier agente que trabaje en este repositorio.
+> NO es una biblia de reglas: es un **mapa**. Lee solo lo que necesites
+> (divulgación progresiva). Si el leader te pasó un **paquete de contexto**
+> (JSON de `./backlog.sh next`), trabaja con él: no re-derives su contenido.
 
 ## 1. Antes de empezar (obligatorio)
 
-1. Ejecuta `./init.sh` y verifica que termina sin errores. Si falla, **para**
-   y resuelve el entorno antes de tocar código.
-1b. **¿Primera vez sobre este proyecto?** Si `backlog.json` aún es la plantilla
-   (`project == "mi-proyecto"`, área `core` con `verify` placeholder, `items`
-   vacío), el arnés no está configurado: ver `docs/onboarding.md` (agente
-   `setup`) antes de empezar a trabajar features.
-2. Lee `progress/current.md` para entender en qué estado quedó la última sesión.
-3. Lee `backlog.json`. Toda feature nueva (`"sdd": true`) pasa por
-   **Spec Driven Development** — ver `docs/specs.md` y §4 de este archivo.
-4. Lee `docs/specs.md` antes de tocar cualquier spec o feature `sdd: true`.
+1. Ejecuta `./init.sh` y verifica que termina sin errores. Si falla, **para**.
+2. ¿Primera vez sobre este proyecto? (estado-plantilla en `backlog.json`) →
+   ver `docs/onboarding.md` (agente `setup`).
+3. Lee `progress/current.md` y `./backlog.sh next` para saber dónde estás.
 
 ## 2. Mapa del repositorio
 
 | Archivo / carpeta            | Qué contiene                                                                | Cuándo leerlo |
 |------------------------------|-----------------------------------------------------------------------------|---------------|
-| `backlog.json`               | Backlog de tareas con `type` (`feature`/`bug`/`refactor`) y estado (`pending` / `spec_ready` / `in_progress` / `done` / `blocked`) | Siempre, al empezar |
+| `backlog.json`               | Backlog de tareas. **Se muta SOLO via `./backlog.sh`** (hook lo bloquea)    | Vía `./backlog.sh next/get` |
+| `backlog.sh`                 | `next` / `get` / `add` / `set-status` con transiciones validadas            | Para cualquier cambio de estado |
+| `check-spec.sh`              | Gates mecánicos de un spec (EARS, tasks, trazabilidad, aceptación)          | Lo corren backlog.sh, spec_author, implementer y reviewer |
 | `progress/current.md`        | Estado de la sesión actual                                                  | Siempre, al empezar |
 | `progress/history.md`        | Bitácora append-only de sesiones anteriores                                 | Si necesitas contexto histórico |
-| `specs/<feature>/`           | Expediente completo de la feature: `requirements.md` + `design.md` + `tasks.md` (spec_author, Kiro-style) + `impl.md` (informe del implementer) + `review.md` (veredicto del reviewer) | Antes de implementar cualquier feature con `"sdd": true` |
-| `docs/architecture.md`       | Qué significa "hacer un buen trabajo" en este proyecto                      | Antes de implementar |
-| `docs/conventions.md`        | Reglas de estilo, nombres, estructura                                       | Antes de escribir código |
-| `docs/specs.md`              | Proceso SDD: EARS notation, los 3 archivos, puerta de aprobación humana     | Antes de redactar o leer un spec |
-| `docs/<área>/`               | Conocimiento por área del monorepo: `conventions.md` + `skills/` (índice `SKILLS.md`) | Antes de implementar en esa área |
-| `docs/verification.md`       | Cómo verificar que tu trabajo funciona (incluye trazabilidad requirements)  | Antes de declarar una tarea como `done` |
-| `docs/qa.md`                 | Capa de aceptación: agente `qa`, `qa.kind` por área, Playwright/curl         | Si el ítem toca un área con interfaz observable (web/http) |
-| `qa/`                        | Hogar de scripts de aceptación: `web/` (Playwright), `api/` (curl)           | Lo gestiona el agente `qa` |
-| `docs/onboarding.md`         | Configurar el arnés sobre un proyecto la primera vez (agente `setup`)         | La primera vez que usás el arnés sobre un proyecto |
+| `specs/<feature>/`           | Expediente de la feature: spec (`requirements/design/tasks.md`, o `spec.md` si lite) + `impl.md` + `review.md` (+ `acceptance.md` si qa) | Antes de implementar |
+| `specs/_templates/`          | Plantillas de todos los archivos de spec. **Copia y rellena, no inventes estructura** | Al redactar specs o informes |
+| `docs/specs.md`              | Proceso SDD: EARS, tipos de trabajo, SDD lite, conformidad por área         | Antes de redactar o leer un spec |
+| `docs/architecture.md`       | Qué significa "hacer un buen trabajo" en este proyecto                      | Antes de diseñar/revisar |
+| `docs/conventions.md`        | Principios genéricos de estilo                                              | Si el área no define lo contrario |
+| `docs/<área>/`               | Conocimiento por área: `conventions.md` + `skills/` (índice `SKILLS.md`)    | Antes de implementar en esa área |
+| `docs/verification.md`       | Cómo demostrar que el trabajo funciona                                      | Antes de declarar `done` |
+| `docs/qa.md`                 | Capa de aceptación: agente `qa`, `qa.kind` por área                         | Si el ítem toca un área web/http |
+| `docs/onboarding.md`         | Configurar el arnés la primera vez (agente `setup`)                          | Solo en estado-plantilla |
 | `CHECKPOINTS.md`             | Criterios objetivos de "estado final correcto"                              | Para auto-evaluarte |
-| `.claude/agents/`            | Definiciones de subagentes (`leader`, `setup`, `spec_author`, `implementer`, `qa`, `reviewer`) | Si orquestas trabajo |
-| `<path>/` por área           | Código de cada área (ver `rules.areas[].path` en `backlog.json`)            | Para implementar |
-| Tests del área               | En la ubicación que define cada área (`docs/<área>/conventions.md`)         | Para verificar |
+| `.claude/agents/`            | Definiciones de subagentes (leader, setup, spec_author, implementer, qa, reviewer) | Si orquestas trabajo |
+| `<path>/` por área           | Código de cada área (`rules.areas[].path`)                                  | Para implementar |
 
 ## 3. Reglas duras (no negociables)
 
-- **Una sola feature a la vez.** No mezcles cambios de varias tareas en la misma sesión.
-- **No declares una tarea `done` sin pruebas verdes.** Ejecuta `./init.sh` y
-  asegúrate de que el bloque de tests pasa al 100%.
-- **No saltes la fase de spec.** Toda feature con `"sdd": true` debe pasar
-  por `spec_author` y obtener aprobación humana antes de tocar código.
-- **No saltes la puerta de aprobación humana.** El leader detiene el flujo
-  en `spec_ready` y espera.
-- **Documenta lo que haces** en `progress/current.md` mientras trabajas, no al final.
-- **Deja el repositorio limpio** antes de cerrar la sesión (ver §5).
-- **Si no sabes algo, busca en `docs/`** antes de inventarlo.
+- **Una sola feature a la vez** (`backlog.sh` lo valida).
+- **`backlog.json` se muta solo via `./backlog.sh`.** Las transiciones
+  ilegales y el salto de la puerta humana fallan con exit code, no con prosa.
+- **No declares `done` sin verde**: `./check-spec.sh --stage impl` +
+  `./init.sh` (backlog.sh los exige automáticamente).
+- **No saltes la fase de spec ni la aprobación humana** (`spec_ready` ⏸).
+- **Documenta en `progress/current.md` mientras trabajas**, no al final.
+- **Deja el repo limpio** al cerrar (ver §5). Si no sabes algo, busca en
+  `docs/` antes de inventarlo.
 
 ## 4. Flujo de trabajo (SDD)
 
 ```
-pending → [spec_author] → spec_ready → ⏸ HUMANO → in_progress → [implementer → qa → reviewer] → done
+pending → [spec_author] → spec_ready → ⏸ HUMANO → in_progress
+        → [implementer] → [qa]* → [reviewer] → done     (*si qa.kind != none)
 ```
 
-1. El leader detecta la primera feature `pending` con `"sdd": true`.
-2. El leader lanza `spec_author`, que crea
-   `specs/<name>/{requirements,design,tasks}.md` y marca el status como
-   `spec_ready`.
-3. **Pausa.** El humano lee el spec en `specs/<name>/` y aprueba (o pide cambios).
-4. Una vez aprobado, el leader cambia el status a `in_progress` y lanza `implementer`.
-5. El implementer ejecuta `tasks.md` una a una, marcándolas `[x]`.
-6. Si el ítem toca un área con interfaz observable (`qa.kind != none`), el leader
-   lanza `qa`: ejercita la app corriendo (Playwright/curl) contra el contrato y
-   escribe `specs/<name>/acceptance.md`. Ver `docs/qa.md`. (Se salta si no aplica.)
-7. El reviewer verifica trazabilidad `R<n>` ↔ test, tasks completas y —si hubo
-   `qa`— que `acceptance.md` está en PASS; aprueba o rechaza.
-8. Si aprueba, el implementer marca `done` y mueve el resumen a
-   `progress/history.md`.
+El proceso completo (EARS, tipos de trabajo, lite, gates) está en
+`docs/specs.md` — única fuente de verdad del flujo. La orquestación
+(quién lanza a quién, escalado) está en `.claude/agents/leader.md`.
 
 ## 5. Cierre de sesión (lifecycle)
 
-Antes de terminar:
-
-1. Ejecuta `./init.sh` — todo verde.
-2. Si la tarea está acabada: marca `status: "done"` en `backlog.json`.
-3. Mueve el resumen de `progress/current.md` al final de `progress/history.md`.
-4. Vacía `progress/current.md` dejando solo la plantilla.
-5. No dejes archivos temporales, ni logs de debug, ni TODOs sin contexto.
-6. **El expediente de la feature (`specs/<name>/`, incluidos `impl.md` y
-   `review.md`) es el registro permanente versionado: se commitea, no se borra.**
-   `progress/` debe quedar **solo** con `current.md` e `history.md`.
+1. `./init.sh` — todo verde.
+2. Ítem acabado → `./backlog.sh set-status <name> done` (corre los gates solo).
+3. Mueve el resumen de `progress/current.md` al final de `progress/history.md`
+   y deja `current.md` con solo la plantilla.
+4. Sin archivos temporales ni TODOs sin contexto. El expediente
+   `specs/<name>/` (incl. `impl.md`, `review.md`) **se commitea, no se borra**;
+   `progress/` queda solo con `current.md` e `history.md`.
 
 ## 6. Si te bloqueas
 
 - Relee la sección relevante de `docs/`.
-- Si la herramienta no hace lo que esperas, **no inventes un workaround**:
-  documenta el bloqueo en `progress/current.md` y para la sesión.
+- Si una herramienta no hace lo que esperas, **no inventes un workaround**:
+  anota el bloqueo en `progress/current.md`,
+  `./backlog.sh set-status <name> blocked`, y para la sesión.
