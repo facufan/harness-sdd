@@ -10,9 +10,9 @@ dedicada en cuanto deja `pending`:
 
 ```
 specs/<feature-name>/
-├── requirements.md   # QUÉ se necesita (EARS notation)        — spec_author
-├── design.md         # CÓMO se construirá (decisiones técnicas) — spec_author
-├── tasks.md          # PASOS concretos a implementar           — spec_author
+├── requirements.md   # QUÉ se necesita (EARS notation)        — spec-author
+├── design.md         # CÓMO se construirá (decisiones técnicas) — spec-author
+├── tasks.md          # PASOS concretos a implementar           — spec-author
 ├── impl.md           # Informe de implementación: mapa R→test + output tests — implementer
 └── review.md         # Veredicto del reviewer                  — reviewer
 ```
@@ -46,12 +46,17 @@ Lo validable por patrón **no se valida con criterio**: lo corre
 
 - `--stage spec` (lo corre `backlog.sh` al pasar a `spec_ready`): archivos del
   spec presentes, cada `## R<n>` con `DEBE`/`NO DEBE` y sin verbos blandos,
-  tasks con `Cubre: R<n>`, toda `R<n>` cubierta por una task, `## Conformidad`
-  presente (si hay área) con citas `archivo:línea` reales, `## Aceptación
-  observable` (si hay qa).
+  tasks con `Cubre: R<n>`, toda `R<n>` cubierta por una task, **TDD para
+  features** (cada `R<n>` con una task `[test]` que precede a su task de
+  implementación), `## Conformidad` presente (si hay área) con citas
+  `archivo:línea` reales, `## Aceptación observable` (si hay qa).
 - `--stage impl` (lo corre `backlog.sh` al pasar a `done`): todas las tasks
   `[x]`, `impl.md` con `## Trazabilidad` cubriendo cada `R<n>`, evidencia
   rojo→verde para bugs, `acceptance.md` en `ACCEPTANCE_PASS` si hay qa.
+- `--stage impl --pre-qa` (autocheck del `implementer`, antes de que corra el
+  `qa`): igual que `impl` pero **sin** exigir `acceptance.md` — ese archivo lo
+  produce el agente `qa` después. El gate completo lo re-corre `backlog.sh`
+  en el `done`.
 
 El `reviewer` no repite estos checks: aporta solo el **juicio** (causa raíz
 real, calidad de tests, contrato público, convenciones).
@@ -64,7 +69,7 @@ rechaza transiciones ilegales y corre los gates de arriba automáticamente.
 
 | Estado         | Significado                                                    |
 |----------------|----------------------------------------------------------------|
-| `pending`      | Sin spec. El `spec_author` es el primero en actuar.            |
+| `pending`      | Sin spec. El `spec-author` es el primero en actuar.            |
 | `spec_ready`   | Spec drafted. Esperando aprobación humana. NO se toca código.  |
 | `in_progress`  | Spec aprobado. `implementer` trabajando.                       |
 | `done`         | Código verde, `reviewer` aprobó, sesión cerrada.               |
@@ -72,7 +77,7 @@ rechaza transiciones ilegales y corre los gates de arriba automáticamente.
 
 ## La puerta de aprobación humana
 
-El flujo automático se detiene **una vez**: cuando el `spec_author` termina
+El flujo automático se detiene **una vez**: cuando el `spec-author` termina
 sus tres archivos, marca la feature como `spec_ready` y para. El humano
 lee `specs/<feature>/` y dice "aprobado" (o pide cambios).
 
@@ -80,7 +85,7 @@ Solo entonces el `leader` transiciona `spec_ready → in_progress` y lanza
 el `implementer`.
 
 ```
-pending → [spec_author] → spec_ready → ⏸ HUMANO → in_progress → [implementer → qa* → reviewer] → done
+pending → [spec-author] → spec_ready → ⏸ HUMANO → in_progress → [implementer → qa* → reviewer] → done
 ```
 (*el paso `qa` solo si alguna área del ítem tiene `qa.kind != none`; ver `qa.md`)
 
@@ -133,16 +138,29 @@ puntos donde tu feature roza la frontera de esas reglas.
 ## tasks.md — checklist ejecutable
 
 Pasos discretos en orden, cada uno con checkbox. Cada task referencia al
-menos un `R<n>` que cubre.
+menos un `R<n>` que cubre. Las tasks de **test** llevan el marcador `[test]`
+inmediatamente después del id.
 
-Ejemplo:
+**TDD para features (gate mecánico).** En ítems `type: feature`, cada `R<n>`
+debe tener una task `[test]` que **precede** a la primera task de
+implementación que cubra ese mismo `R<n>` — `check-spec.sh` lo valida por
+regex y `spec_ready` no se alcanza sin cumplirlo. El implementer corre el
+test nuevo esperando **ROJO** (la implementación no existe todavía) y solo
+entonces implementa hasta **VERDE**. Un test que nace verde no prueba nada.
+
+Ejemplo (orden test-first):
 
 ```markdown
-- [ ] T1 — Añadir el comando `recent` en el módulo CLI del área. Cubre: R1, R3.
-- [ ] T2 — Parsear el flag `--limit` con validación. Cubre: R1, R2.
-- [ ] T3 — Añadir test "recent usa límite 5 por defecto" en los tests del área. Cubre: R1.
-- [ ] T4 — Añadir test "recent rechaza límite <= 0" en los tests del área. Cubre: R2.
+- [ ] T1 [test] — Test "recent usa límite 5 por defecto" en los tests del área. Cubre: R1.
+- [ ] T2 [test] — Test "recent rechaza límite <= 0" en los tests del área. Cubre: R2.
+- [ ] T3 [test] — Test "recent acepta --limit custom" en los tests del área. Cubre: R3.
+- [ ] T4 — Añadir el comando `recent` en el módulo CLI del área. Cubre: R1, R3.
+- [ ] T5 — Parsear el flag `--limit` con validación. Cubre: R1, R2.
 ```
+
+(También vale intercalar: `T1 [test]` → `T2` impl → `T3 [test]` → `T4` impl;
+lo que el gate exige es que el `[test]` de cada `R<n>` venga antes que su
+implementación.)
 
 El `implementer` marca `[x]` cada task al completarla. El `reviewer`
 rechaza si queda alguna `[ ]` sin justificación documentada.
@@ -173,7 +191,7 @@ mismos 3 archivos de spec, pero el **contenido obligatorio** cambia:
 |---|---|---|---|
 | `requirements.md` | EARS de la conducta nueva | EARS de la conducta **correcta** + un requirement de reproducción (pasos → "hoy hace X, DEBE hacer Y") | Invariante: "El sistema DEBE preservar la conducta observable de `<área>`" + objetivo estructural. **Prohibido** añadir conducta nueva |
 | `design.md` | archivos/firmas + alternativa descartada | **causa raíz** (no síntoma) + por qué el arreglo la ataca + alternativa | qué se mueve/extrae/renombra + **contrato público preservado** + alternativa |
-| `tasks.md` | código + tests por `R<n>` | **T1: test de regresión que reproduce el defecto y FALLA (rojo)** → arreglo hasta verde | **T1: tests de caracterización verdes ANTES de refactorizar** → refactor → tests verdes sin tocar aserciones |
+| `tasks.md` | **TDD**: por cada `R<n>`, task `[test]` (falla en rojo) **antes** de la task que lo implementa (gate mecánico) | **T1: test de regresión que reproduce el defecto y FALLA (rojo)** → arreglo hasta verde | **T1: tests de caracterización verdes ANTES de refactorizar** → refactor → tests verdes sin tocar aserciones |
 
 ### Ejemplos EARS por tipo
 

@@ -29,16 +29,26 @@ NO leas `AGENTS.md`, `CLAUDE.md`, `docs/specs.md` ni docs de otras áreas.
 ## Protocolo
 
 1. Anota en `progress/current.md`: `Feature en curso: <id> — <name>` + plan.
-2. **Para cada task `T<n>` en orden**:
-   a. Implementa el cambio siguiendo el patrón citado en `## Conformidad`.
-   b. Si la task incluye un test, escríbelo en la ubicación del área.
-   c. Corre el **`verify` del área** (del paquete; rápido, scoped). Rojo → arregla.
+2. **Para cada task `T<n>` en orden** (en features el orden es TDD: la task
+   `[test]` de cada `R<n>` viene antes que su implementación — respétalo):
+   a. **Task `[test]`**: escribe el test en la ubicación de tests del área y
+      córrelo esperando **ROJO** (la implementación aún no existe; un test que
+      nace verde no prueba nada — si nace verde, el test está mal o la conducta
+      ya existía: revísalo o para y reporta). NO toques código de la app para
+      "arreglarlo".
+   b. **Task de implementación**: implementa siguiendo el patrón citado en
+      `## Conformidad` hasta poner en **VERDE** los tests de sus `R<n>`.
+   c. Corre el **`verify` del área** (del paquete; rápido, scoped). Tras una
+      task de implementación: todo verde. Tras una task `[test]`: el único
+      rojo aceptable es el del test recién escrito.
    d. Marca `[x] T<n>` en `tasks.md` (o `spec.md` si lite).
 3. Al terminar todas las tasks: corre `./init.sh` **una vez** (verificación
    completa). Si falla → vuelve al paso 2.
 4. Escribe `specs/<name>/impl.md` partiendo de `specs/_templates/impl.md`:
    archivos tocados, **mapa `R<n> → test`**, output de verificación.
-5. Autoverifica: `./check-spec.sh <name> --stage impl`. Corrige hasta verde.
+5. Autoverifica: `./check-spec.sh <name> --stage impl --pre-qa`. Corrige hasta
+   verde. (El flag `--pre-qa` omite el gate de `acceptance.md`: ese archivo lo
+   produce el agente `qa` **después** de ti — NUNCA lo escribas tú.)
 6. **No marques `done` tú mismo.** Espera al reviewer.
 7. Si el leader te relanza con el APPROVED del reviewer:
    `./backlog.sh set-status <name> done` y mueve el resumen de
@@ -63,7 +73,8 @@ NO leas `AGENTS.md`, `CLAUDE.md`, `docs/specs.md` ni docs de otras áreas.
 - ❌ Si una task exige desviarse del spec, paras y reportas. NO inventes
   requirements ni decisiones de diseño — pide cambios al spec primero.
 - ❌ NUNCA edites `backlog.json` a mano: solo `./backlog.sh set-status`.
-- ✅ Todo código nuevo lleva su test antes de pasar a la siguiente task.
+- ✅ TDD: el test de cada `R<n>` corre en **ROJO** antes de que exista su
+  implementación. Nunca reordenes las tasks para implementar primero.
 - ✅ Si una herramienta falla raro, NO improvises workarounds:
   `./backlog.sh set-status <name> blocked`, anota en `progress/current.md`, fin.
 

@@ -7,7 +7,7 @@
 # olvida de las reglas.
 #
 # Uso:
-#   ./backlog.sh next                       # ítem accionable + paquete de contexto (JSON)
+#   ./backlog.sh next                       # ítem accionable + paquete de contexto (JSON; incluye lista 'blocked' si hay)
 #   ./backlog.sh get <name>                 # paquete de contexto de un ítem (JSON)
 #   ./backlog.sh add '<json>'               # añade un ítem (status forzado a pending)
 #   ./backlog.sh set-status <name> <status> # transición validada de estado
@@ -102,7 +102,12 @@ function save() {
 
 if (cmd === "next") {
   const it = items.find((i) => i.status !== "done" && i.status !== "blocked");
-  console.log(JSON.stringify(it ? packet(it) : { next: null, hint: "no hay ítems accionables" }, null, 2));
+  const out = it ? packet(it) : { next: null, hint: "no hay ítems accionables" };
+  // Los blocked no son accionables pero NUNCA invisibles: el leader debe
+  // verlos y resolverlos con el humano (leader.md → Caso E).
+  const blocked = items.filter((i) => i.status === "blocked").map((i) => i.name);
+  if (blocked.length) out.blocked = blocked;
+  console.log(JSON.stringify(out, null, 2));
   process.exit(0);
 }
 

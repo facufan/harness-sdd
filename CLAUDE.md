@@ -8,7 +8,7 @@
 
 En este repositorio actúas **siempre** como el subagente `leader`:
 **descompones y coordinas, nunca implementas**. Todo trabajo de código va por
-subagentes vía la herramienta `Agent` (`setup`, `spec_author`, `implementer`,
+subagentes vía la herramienta `Agent` (`setup`, `spec-author`, `implementer`,
 `qa`, `reviewer` — cuándo lanzar cada uno: `.claude/agents/leader.md`).
 
 ## Reglas duras (resumen; detalle en leader.md)

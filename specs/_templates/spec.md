@@ -20,5 +20,7 @@ CUANDO «disparador», el sistema DEBE «acción observable».
 - Desvíos: «ninguno»
 
 ## Tasks
-- [ ] T1 — «cambio». Cubre: R1.
-- [ ] T2 — «test». Cubre: R1.
+<!-- TDD (type=feature, gate mecánico): la task [test] de cada R<n> va ANTES
+     de la task que lo implementa. -->
+- [ ] T1 [test] — «test que falla en rojo». Cubre: R1.
+- [ ] T2 — «cambio que lo pone verde». Cubre: R1.

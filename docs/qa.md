@@ -11,11 +11,11 @@ herramienta y enforcement.
 ## Dónde encaja en el flujo
 
 ```
-pending → [spec_author] → spec_ready → ⏸ HUMANO → in_progress
+pending → [spec-author] → spec_ready → ⏸ HUMANO → in_progress
         → [implementer] → [qa] → [reviewer] → done
 ```
 
-- El `spec_author` deja en `design.md` una sección **`## Aceptación observable`**:
+- El `spec-author` deja en `design.md` una sección **`## Aceptación observable`**:
   escenarios de caja negra (prosa) que mapean cada `acceptance` → comportamiento
   visible + `R<n>`.
 - El `qa` ([../.claude/agents/qa.md](../.claude/agents/qa.md)) traduce esos

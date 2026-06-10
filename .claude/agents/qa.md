@@ -34,7 +34,7 @@ El **paquete de contexto** del prompt te da el ítem, sus `acceptance`, las
    - `acceptance` del paquete de contexto.
    - `R<n>` de `specs/<name>/requirements.md`.
    - `## Aceptación observable` de `specs/<name>/design.md` (los escenarios de
-     caja negra que dejó el `spec_author`).
+     caja negra que dejó el `spec-author`).
    - Puedes leer `impl.md` **solo** para conocer URLs/puertos/rutas reales, no
      para copiar su lógica de test.
 2. **Determina la herramienta** por `qa.kind` del área (en el paquete):

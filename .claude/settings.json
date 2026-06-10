@@ -1,13 +1,25 @@
 {
-  "$schema_comment": "Hooks que automatizan la verificación. El harness los ejecuta, no el agente, así que no se pueden saltar. Agnóstico de lenguaje: la verificación real la define el 'verify' de cada área en backlog.json.",
+  "$schema_comment": "PROPUESTA — Claude no puede editar settings.json por sí mismo (auto-modificación de permisos). Revisá este archivo y, si estás de acuerdo, copiá su contenido a .claude/settings.json y borrá este archivo. Cambios vs el actual: (1) hook PreToolUse ACTIVO con matcher Edit|Write|Bash (protect-backlog.js ahora también bloquea escrituras a backlog.json via Bash: redirección, sed -i, writeFileSync...), (2) se quita 'Bash(node -e*)' de la allowlist (era el bypass directo del hook; init.sh no lo necesita porque corre como ./init.sh), (3) permisos para ./backlog.sh y ./check-spec.sh, (4) comentarios honestos: el hook Stop es informativo, NO bloqueante — los gates duros viven en backlog.sh + check-spec.sh.",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/protect-backlog.sh",
+            "description": "backlog.json solo se muta via ./backlog.sh (transiciones validadas). Excepción: estado-plantilla (onboarding)."
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
           {
             "type": "command",
             "command": "./init.sh > /tmp/harness_init.log 2>&1 && echo '[harness] init.sh OK' || (echo '[harness] init.sh FALLÓ — revisa /tmp/harness_init.log antes de cerrar' && cat /tmp/harness_init.log | tail -20)",
-            "description": "Antes de cerrar la sesión, fuerza una verificación completa (corre el verify de cada área)."
+            "description": "Aviso (no bloqueante) al cerrar la sesión: corre el verify de cada área y reporta si quedó rojo."
           }
         ]
       }
@@ -16,7 +28,8 @@
   "permissions": {
     "allow": [
       "Bash(./init.sh)",
-      "Bash(node -e*)",
+      "Bash(./backlog.sh*)",
+      "Bash(./check-spec.sh*)",
       "Bash(npm install*)",
       "Bash(npm run qa:*)",
       "Bash(npx playwright*)",

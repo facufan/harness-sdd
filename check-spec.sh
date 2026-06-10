@@ -6,8 +6,11 @@
 # requiere criterio (causa raíz real, calidad del diseño, contrato público).
 #
 # Uso:
-#   ./check-spec.sh <name> --stage spec   # tras el spec_author (pre-aprobación)
-#   ./check-spec.sh <name> --stage impl   # tras el implementer (pre-done)
+#   ./check-spec.sh <name> --stage spec            # tras el spec-author (pre-aprobación)
+#   ./check-spec.sh <name> --stage impl            # gate completo de done (backlog.sh / reviewer)
+#   ./check-spec.sh <name> --stage impl --pre-qa   # autocheck del implementer: igual que impl
+#                                                  # pero SIN exigir acceptance.md (lo produce
+#                                                  # el agente qa, que corre después)
 #
 # Lo corre ./backlog.sh automáticamente en set-status spec_ready|done.
 # Ítems sin "sdd" → OK inmediato (no tienen gates de spec).
@@ -15,17 +18,22 @@
 set -u
 NAME="${1:-}"
 STAGE="spec"
+PREQA=0
 if [ "${2:-}" = "--stage" ]; then STAGE="${3:-spec}"; fi
+for arg in "$@"; do
+  if [ "$arg" = "--pre-qa" ]; then PREQA=1; fi
+done
 if [ -z "$NAME" ]; then
   echo "uso: ./check-spec.sh <name> [--stage spec|impl]" >&2
   exit 1
 fi
 
-CS_NAME="$NAME" CS_STAGE="$STAGE" node <<'JS'
+CS_NAME="$NAME" CS_STAGE="$STAGE" CS_PREQA="$PREQA" node <<'JS'
 const fs = require("fs");
 
 const name = process.env.CS_NAME;
 const stage = process.env.CS_STAGE;
+const preQa = process.env.CS_PREQA === "1";
 let failures = 0;
 const ok = (m) => console.log(`[OK]    ${m}`);
 const bad = (m) => { console.log(`[FAIL]  ${m}`); failures++; };
@@ -87,6 +95,36 @@ for (const rid of rIds) {
 }
 if (rIds.length && rIds.every((r) => covered.has(r))) ok("toda R<n> cubierta por al menos una task");
 
+// ── 3b. TDD (solo type=feature): el test de cada R precede a su implementación ─
+// Convención: las tasks de test llevan el marcador [test] tras el id:
+//   - [ ] T1 [test] — test "..." . Cubre: R1.
+// Gate: cada R<n> tiene >=1 task [test], y esa task aparece ANTES de la primera
+// task de implementación (sin [test]) que cubra el mismo R<n>.
+// bug/refactor tienen su propia disciplina (regresión/caracterización en T1).
+if (type === "feature" && taskLines.length) {
+  const first = { test: {}, impl: {} }; // R<n> → primera task de cada clase
+  taskLines.forEach(([, , tid, rest], idx) => {
+    const m = rest.match(/Cubre:\s*([^\n]*)/);
+    if (!m) return;
+    const kind = /^\s*\[test\]/.test(rest) ? "test" : "impl";
+    for (const r of m[1].matchAll(/R\d+/g)) {
+      if (!first[kind][r[0]]) first[kind][r[0]] = { tid, idx };
+    }
+  });
+  let tddOk = true;
+  for (const rid of rIds) {
+    const t = first.test[rid], i = first.impl[rid];
+    if (!t) {
+      bad(`${rid} sin task [test] — type=feature exige TDD: '- [ ] T<n> [test] — ... Cubre: ${rid}' ANTES de la task que lo implementa`);
+      tddOk = false;
+    } else if (i && i.idx < t.idx) {
+      bad(`${rid}: la task de implementación ${i.tid} precede a su task [test] ${t.tid} — TDD exige el test primero`);
+      tddOk = false;
+    }
+  }
+  if (rIds.length && tddOk) ok("TDD: cada R<n> tiene su task [test] antes de su implementación");
+}
+
 // ── 4. Design: conformidad por área y aceptación observable ─────
 if (itemAreas.length > 0) {
   if (!/^##+\s*Conformidad\b/m.test(designSrc)) {
@@ -124,10 +162,14 @@ if (stage === "impl") {
   }
 
   if (qaActive) {
-    const acc = read("acceptance.md");
-    if (!acc) bad(`falta ${dir}/acceptance.md (área con qa activo: el agente qa debe correr antes del done)`);
-    else if (!/ACCEPTANCE_PASS/.test(acc)) bad("acceptance.md sin veredicto ACCEPTANCE_PASS");
-    else ok("acceptance.md en ACCEPTANCE_PASS");
+    if (preQa) {
+      ok("(--pre-qa) gate de acceptance.md diferido: el agente qa corre después del implementer");
+    } else {
+      const acc = read("acceptance.md");
+      if (!acc) bad(`falta ${dir}/acceptance.md (área con qa activo: el agente qa debe correr antes del done)`);
+      else if (!/ACCEPTANCE_PASS/.test(acc)) bad("acceptance.md sin veredicto ACCEPTANCE_PASS");
+      else ok("acceptance.md en ACCEPTANCE_PASS");
+    }
   }
 }
 

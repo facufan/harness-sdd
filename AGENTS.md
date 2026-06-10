@@ -18,7 +18,7 @@
 |------------------------------|-----------------------------------------------------------------------------|---------------|
 | `backlog.json`               | Backlog de tareas. **Se muta SOLO via `./backlog.sh`** (hook lo bloquea)    | Vía `./backlog.sh next/get` |
 | `backlog.sh`                 | `next` / `get` / `add` / `set-status` con transiciones validadas            | Para cualquier cambio de estado |
-| `check-spec.sh`              | Gates mecánicos de un spec (EARS, tasks, trazabilidad, aceptación)          | Lo corren backlog.sh, spec_author, implementer y reviewer |
+| `check-spec.sh`              | Gates mecánicos de un spec (EARS, tasks, trazabilidad, aceptación)          | Lo corren backlog.sh, spec-author, implementer y reviewer |
 | `progress/current.md`        | Estado de la sesión actual                                                  | Siempre, al empezar |
 | `progress/history.md`        | Bitácora append-only de sesiones anteriores                                 | Si necesitas contexto histórico |
 | `specs/<feature>/`           | Expediente de la feature: spec (`requirements/design/tasks.md`, o `spec.md` si lite) + `impl.md` + `review.md` (+ `acceptance.md` si qa) | Antes de implementar |
@@ -31,7 +31,7 @@
 | `docs/qa.md`                 | Capa de aceptación: agente `qa`, `qa.kind` por área                         | Si el ítem toca un área web/http |
 | `docs/onboarding.md`         | Configurar el arnés la primera vez (agente `setup`)                          | Solo en estado-plantilla |
 | `CHECKPOINTS.md`             | Criterios objetivos de "estado final correcto"                              | Para auto-evaluarte |
-| `.claude/agents/`            | Definiciones de subagentes (leader, setup, spec_author, implementer, qa, reviewer) | Si orquestas trabajo |
+| `.claude/agents/`            | Definiciones de subagentes (leader, setup, spec-author, implementer, qa, reviewer) | Si orquestas trabajo |
 | `<path>/` por área           | Código de cada área (`rules.areas[].path`)                                  | Para implementar |
 
 ## 3. Reglas duras (no negociables)
@@ -49,7 +49,7 @@
 ## 4. Flujo de trabajo (SDD)
 
 ```
-pending → [spec_author] → spec_ready → ⏸ HUMANO → in_progress
+pending → [spec-author] → spec_ready → ⏸ HUMANO → in_progress
         → [implementer] → [qa]* → [reviewer] → done     (*si qa.kind != none)
 ```
 

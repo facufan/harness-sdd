@@ -6,8 +6,9 @@
 
 ## C1 — El arnés está completo
 
-- [ ] Existen los 4 archivos base: `AGENTS.md`, `init.sh`, `backlog.json`,
-      `progress/current.md`.
+- [ ] Existen los archivos base: `AGENTS.md`, `init.sh`, `backlog.json`,
+      `backlog.sh`, `check-spec.sh`, `CHECKPOINTS.md`, `progress/current.md`
+      (la lista exacta la valida `init.sh` §2).
 - [ ] Existen los 3 docs: `docs/architecture.md`, `docs/conventions.md`,
       `docs/verification.md`.
 - [ ] `./init.sh` termina con exit code 0.
@@ -59,6 +60,9 @@
 
 - [ ] Todo ítem declara un `type` válido (`feature` / `bug` / `refactor`) o
       ninguno (se asume `feature`).
+- [ ] Todo `feature` `done` con sdd sigue TDD en `tasks.md`: cada `R<n>` tiene
+      una task `[test]` que **precede** a su task de implementación
+      (lo valida `check-spec.sh`).
 - [ ] Todo `bug` `done` tiene un test de regresión con evidencia **rojo→verde**
       en `specs/<name>/impl.md` y causa raíz en `design.md`.
 - [ ] Todo `refactor` `done` mantiene los tests existentes verdes sin aserciones
@@ -76,7 +80,9 @@
 ## C9 — Aceptación observable (features de interfaz)
 
 - [ ] Toda área con interfaz observable declara `qa.kind` (`web`/`http`/`both`)
-      con `base_url` y `start` en `backlog.json` (ver `docs/qa.md`).
+      con `base_url` en `backlog.json`. `start`/`ready` son **opcionales**: sin
+      `start`, la app es de ciclo de vida externo y el humano la levanta
+      (ver `docs/qa.md`).
 - [ ] Todo ítem `done` que toca un área con `qa.kind != none` tiene
       `specs/<name>/acceptance.md` con veredicto `ACCEPTANCE_PASS`.
 - [ ] Cada criterio de aceptación tiene evidencia ejecutable (screenshot o

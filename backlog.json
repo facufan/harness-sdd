@@ -15,7 +15,7 @@
         "skills": "docs/core/skills/SKILLS.md",
         "verify": "echo 'TODO: reemplaza por el comando de verificación real de esta área'",
         "qa": {
-          "_comment": "Capa de aceptación (opt-in). kind: web|http|both|none. 'none' = sin gate de aceptación (default si se omite). Para web/both: base_url + start obligatorios. Ver docs/qa.md.",
+          "_comment": "Capa de aceptación (opt-in). kind: web|http|both|none. 'none' = sin gate de aceptación (default si se omite). Para web/http/both: base_url obligatorio; start/ready OPCIONALES (sin start, la app es de ciclo de vida externo y el qa no la arranca ni la baja). Ver docs/qa.md.",
           "kind": "none"
         }
       }

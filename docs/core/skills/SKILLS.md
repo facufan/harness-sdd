@@ -1,7 +1,7 @@
 # Skills — área `core`
 
 > Índice de skills de esta área. Cada área **debe** tener este archivo (el
-> arnés lo exige en `init.sh`). Es el catálogo que el `spec_author` y el
+> arnés lo exige en `init.sh`). Es el catálogo que el `spec-author` y el
 > `implementer` leen para elegir, por su "cuándo", la skill aplicable a la tarea.
 >
 > Una skill = un procedimiento reutilizable y verificado para hacer algo en

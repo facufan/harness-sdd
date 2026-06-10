@@ -19,7 +19,7 @@ de verificación, sus skills y su capa de aceptación— en `backlog.json`. (`no
 | Pilar                                  | Manifestación en este repo                                                       |
 |----------------------------------------|----------------------------------------------------------------------------------|
 | **1. El repositorio ES el sistema**    | `AGENTS.md`, `init.sh`, `backlog.json`, `specs/`, `progress/`, `docs/`            |
-| **2. Orquestación multi-agente**       | `.claude/agents/`: `leader`, `setup`, `spec_author`, `implementer`, `qa`, `reviewer` |
+| **2. Orquestación multi-agente**       | `.claude/agents/`: `leader`, `setup`, `spec-author`, `implementer`, `qa`, `reviewer` |
 | **3. Spec Driven Development**         | `docs/specs.md`, EARS notation, puerta de aprobación humana en `spec_ready`       |
 | **4. Verificación en dos niveles**     | `verify` por área (unit) + agente `qa` (aceptación), hooks en `.claude/settings.json` |
 | **5. Enforcement mecánico**            | `backlog.sh` (transiciones validadas), `check-spec.sh` (gates por regex), hook que bloquea la edición directa de `backlog.json`, plantillas en `specs/_templates/` |
@@ -63,7 +63,7 @@ brainstorming.
 ### Fase 0 — Brainstorming (meter trabajo al backlog)
 
 Cuando traes una **idea cruda** (no un ítem ya formado con `acceptance` claros),
-el `leader` no la manda directo al `spec_author`: primero facilita un
+el `leader` no la manda directo al `spec-author`: primero facilita un
 brainstorming contigo en el chat (explora intención con preguntas de a una,
 propone 2-3 enfoques con trade-offs, converge en alcance con YAGNI) y recién
 entonces escribe el ítem `pending` en `backlog.json` con `acceptance`
@@ -85,7 +85,7 @@ salta y va directo al flujo SDD.
 
 Lo que ocurre:
 
-**Fase 1 — Spec.** El `leader` lanza un `spec_author` que escribe
+**Fase 1 — Spec.** El `leader` lanza un `spec-author` que escribe
 `specs/<feature>/{requirements.md, design.md, tasks.md}` y deja la feature en
 `spec_ready`. Luego **para y te pide aprobación**.
 
@@ -106,8 +106,9 @@ Cuando estés conforme, dices al chat «aprobado» (o pides cambios).
 in_progress → [implementer] → [qa] → [reviewer] → done
 ```
 
-- `implementer` sigue las tasks una a una marcándolas `[x]` y escribe tests
-  unitarios (Nivel 1).
+- `implementer` sigue las tasks una a una marcándolas `[x]`, en orden **TDD**
+  para features: la task `[test]` de cada `R<n>` corre en ROJO antes de
+  implementar hasta VERDE (Nivel 1).
 - `qa` (**solo si el área declara `qa.kind != none`**) ejercita la app
   **corriendo de verdad** (Playwright para web / curl para HTTP) contra el
   contrato, de forma **independiente** del código del implementer, y escribe
@@ -120,9 +121,9 @@ Dónde queda la traza de cada subagente:
 
 | Archivo                                  | Quién lo escribe   | Qué contiene                                                  |
 |------------------------------------------|--------------------|---------------------------------------------------------------|
-| `specs/<feature>/requirements.md`        | spec_author        | EARS requirements numeradas `R1`, `R2`, ...                   |
-| `specs/<feature>/design.md`              | spec_author        | Decisiones técnicas + `## Aceptación observable` (si aplica)  |
-| `specs/<feature>/tasks.md`               | spec_author        | Checklist; el implementer la va marcando `[x]`                |
+| `specs/<feature>/requirements.md`        | spec-author        | EARS requirements numeradas `R1`, `R2`, ...                   |
+| `specs/<feature>/design.md`              | spec-author        | Decisiones técnicas + `## Aceptación observable` (si aplica)  |
+| `specs/<feature>/tasks.md`               | spec-author        | Checklist; el implementer la va marcando `[x]`                |
 | `specs/<feature>/impl.md`                | implementer        | Archivos tocados + mapa `R<n> → test` + output de los tests   |
 | `specs/<feature>/acceptance.md`          | qa                 | Escenarios de caja negra `PASS`/`FAIL` + evidencia (si aplica) |
 | `specs/<feature>/review.md`              | reviewer           | Checklist contra `docs/`, `specs/<feature>/` y `CHECKPOINTS.md` |
@@ -202,7 +203,7 @@ Ver [docs/qa.md](docs/qa.md) para el detalle completo.
 │   └── results/           # Evidencia efímera (gitignored)
 ├── setup/                 # Workspace efímero del onboarding (gitignored)
 ├── .claude/
-│   ├── agents/            # leader, setup, spec_author, implementer, qa, reviewer
+│   ├── agents/            # leader, setup, spec-author, implementer, qa, reviewer
 │   ├── hooks/             # protect-backlog.sh (backlog.json solo via backlog.sh)
 │   └── settings.json      # Hooks que automatizan la verificación
 ├── <path-de-área>/        # Tu código por área (lo creas tú; ver rules.areas[].path)
@@ -224,8 +225,12 @@ Ver [docs/qa.md](docs/qa.md) para el detalle completo.
   contrato, de forma independiente de quien la implementó.
 - **Trazabilidad obligatoria**: cada `R<n>` se mapea a un test concreto;
   el reviewer rechaza si falta.
+- **TDD mecánico para features**: en `tasks.md` la task `[test]` de cada
+  `R<n>` debe preceder a su implementación — lo valida `check-spec.sh` por
+  regex, no la buena voluntad del modelo (bug y refactor ya tenían su
+  disciplina: regresión rojo→verde y caracterización previa).
 - **Patrón Leader-Setup-Spec-Implementer-QA-Reviewer**: el leader no implementa,
-  el setup no inventa, el spec_author no codifica, el implementer no se
+  el setup no inventa, el spec-author no codifica, el implementer no se
   autoaprueba, el qa no escribe código de la app, el reviewer no edita código.
 - **Opt-in y retrocompatible**: la capa de aceptación se activa por área; un
   proyecto que no la declara corre el flujo clásico sin sobrecosto.

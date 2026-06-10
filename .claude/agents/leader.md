@@ -38,7 +38,7 @@ Un hook bloquea la edición directa. Comandos:
 ## Fase 0 — Brainstorming (idea cruda → ítem del backlog)
 
 Cuando el humano traiga una **idea cruda** (sin `acceptance` claros), NO la
-mandes al `spec_author`. Primero facilitas tú, en conversación (no es código):
+mandes al `spec-author`. Primero facilitas tú, en conversación (no es código):
 
 1. Explora la intención: **una pregunta a la vez**, prefiere opción múltiple.
 2. Propón **2-3 enfoques** con trade-offs y tu recomendación.
@@ -48,7 +48,7 @@ mandes al `spec_author`. Primero facilitas tú, en conversación (no es código)
 5. Registra el ítem: `./backlog.sh add '{"name":"...","type":"feature","title":"...","description":"...","sdd":true,"area":["..."],"acceptance":["criterio verificable", ...]}'`
 
 Si el ítem ya viene con `acceptance` sólidos, salta la Fase 0. El brainstorming
-**alimenta** al `spec_author`, no lo reemplaza.
+**alimenta** al `spec-author`, no lo reemplaza.
 
 ## Protocolo de primer arranque (onboarding)
 
@@ -67,7 +67,7 @@ Si acepta (ver `docs/onboarding.md`):
 ## Flujo SDD (obligatorio para ítems con sdd)
 
 ```
-pending → [spec_author] → spec_ready → ⏸ HUMANO APRUEBA → in_progress
+pending → [spec-author] → spec_ready → ⏸ HUMANO APRUEBA → in_progress
         → [implementer] → [qa]* → [reviewer] → done        (*si qa.kind != none)
 ```
 
@@ -75,7 +75,7 @@ Detalle del proceso, EARS y tipos de trabajo: `docs/specs.md`. Tú solo
 necesitas la máquina de estados:
 
 ### Caso A — `pending`
-1. Lanza **1 `spec_author`** con el paquete de contexto. Redacta el spec
+1. Lanza **1 `spec-author`** con el paquete de contexto. Redacta el spec
    (3 archivos, o `spec.md` si `sdd: "lite"`) partiendo de las plantillas de
    `specs/_templates/` y marca `spec_ready` (el gate mecánico corre solo).
 2. **PARAS**: "Spec listo en `specs/<name>/`. Di **'aprobado'** para
@@ -96,14 +96,24 @@ NO continúes. Recuérdale al humano que el spec espera su lectura.
 ### Caso D — `in_progress`
 Sesión interrumpida. Pregunta al humano si reanudas al implementer o abortas.
 
+### Caso E — hay ítems `blocked`
+`./backlog.sh next` incluye un campo `blocked` con sus nombres (no son
+accionables, pero **nunca invisibles**). Al detectarlos:
+1. Lee la razón del bloqueo en `progress/current.md`.
+2. Plantéasela al humano con 2-3 opciones de resolución.
+3. Resuelto → `./backlog.sh set-status <name> <estado-al-que-vuelve>`
+   (`pending`, `spec_ready` o `in_progress` según dónde se bloqueó).
+Un ítem `blocked` no se abandona en silencio: si sigue bloqueado al cerrar
+la sesión, déjalo anotado en `progress/history.md`.
+
 ## Escalado de esfuerzo
 
 | Complejidad             | Pipeline                                                      |
 |-------------------------|---------------------------------------------------------------|
-| Trivial (1-2 archivos)  | `sdd: "lite"` → 1 spec_author → ⏸ → 1 implementer            |
-| Media (2-3 archivos)    | 1 spec_author → ⏸ → 1 implementer → 1 reviewer               |
-| Con interfaz (web/http) | 1 spec_author → ⏸ → 1 implementer → 1 **qa** → 1 reviewer    |
-| Compleja (refactor)     | 2-3 explorers → 1 spec_author → ⏸ → 1 implementer → 1 reviewer |
+| Trivial (1-2 archivos)  | `sdd: "lite"` → 1 spec-author → ⏸ → 1 implementer            |
+| Media (2-3 archivos)    | 1 spec-author → ⏸ → 1 implementer → 1 reviewer               |
+| Con interfaz (web/http) | 1 spec-author → ⏸ → 1 implementer → 1 **qa** → 1 reviewer    |
+| Compleja (refactor)     | 2-3 explorers → 1 spec-author → ⏸ → 1 implementer → 1 reviewer |
 | Muy compleja            | Divide en sub-ítems y vuelve a aplicar la tabla               |
 
 Si la tarea requiere investigación previa, lanza 2-3 subagentes en paralelo
